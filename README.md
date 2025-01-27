@@ -7,3 +7,5 @@ In order to initilize the database run
 
 -- invoke update
 -- invoke superuser
+-- username: vscode
+-- password: password
