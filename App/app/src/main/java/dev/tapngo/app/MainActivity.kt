@@ -174,7 +174,7 @@ fun MainScreen() {
         if(nfcReader != null && nfcReader!!.isScanning){
             Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = Color.White)
         } else {
-            Text("No NFC scanner found.", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            ItemList()
         }
     }
 }
