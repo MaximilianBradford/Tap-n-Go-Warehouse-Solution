@@ -24,13 +24,13 @@ fun CheckoutScreen(itemData: ItemData) {
     TapNGoTheme {
         // I don't even center this one
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Checkout", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text(text = "Checkout", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.height(8.dp))
             // It's safe to assume that the itemData is not null
             // Even if it is, theoretically the following values will just simply not appear.
-            Text(text = "SKU: ${itemData.sku}", color = Color.White)
+            Text(text = "SKU: ${itemData.sku}", color = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Description: ${itemData.description}", color = Color.White)
+            Text(text = "Description: ${itemData.description}", color = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.height(8.dp))
             if (itemData.imageData != null) {
                 Image(

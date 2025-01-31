@@ -172,7 +172,7 @@ fun AppNavHost(navController: NavHostController) {
 fun MainScreen() {
     Column {
         if(nfcReader != null && nfcReader!!.isScanning){
-            Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
         } else {
             ItemList()
         }
