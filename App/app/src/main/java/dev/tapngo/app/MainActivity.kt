@@ -59,10 +59,6 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         // Initialize the NFC reader... I can probably remove the "callback" parameter and just use context. ~ Dan
         nfcReader = NFCReader(this, nfcAdapter, this)
 
-        // Start the NFC scanner
-        nfcReader.startNfcScanner()
-
-
         // Building the UI
         setContent {
             TapNGoTheme {
