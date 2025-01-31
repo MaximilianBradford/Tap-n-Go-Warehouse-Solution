@@ -1,19 +1,21 @@
 package dev.tapngo.app
 
+
 import android.util.Log
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import dev.tapngo.app.utils.httputils.Cookie
 import dev.tapngo.app.utils.httputils.CookieType
 import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
-import java.net.HttpURLConnection
-
-
-import androidx.compose.runtime.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
 
 @Composable
 fun ItemList() {
@@ -24,8 +26,8 @@ fun ItemList() {
         itemList.addAll(items)
     }
 
-    Column {
-        for (item: ItemListData in itemList) {
+    LazyColumn {
+        items(itemList) { item ->
             ListItem(itemListData = item)
         }
     }
@@ -45,7 +47,7 @@ fun getItemList(): List<ItemListData> {
     )
 
     val response = request.getResponse()
-    if(response.code != HttpURLConnection.HTTP_OK){
+    if (response.code != HttpURLConnection.HTTP_OK) {
         Log.d("ItemList", "Error: Request failed with response code ${response.code}")
         return listOf()
     }
