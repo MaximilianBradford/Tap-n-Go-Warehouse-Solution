@@ -1,5 +1,6 @@
 package dev.tapngo.app
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.NfcManager
@@ -41,10 +42,6 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // controller
     private lateinit var navController: NavHostController
 
-    // reader
-    private lateinit var nfcReader: NFCReader
-
-
     // Entry point for the app.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,10 +55,6 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
 
         // Initialize the NFC reader... I can probably remove the "callback" parameter and just use context. ~ Dan
         nfcReader = NFCReader(this, nfcAdapter, this)
-
-        // Start the NFC scanner
-        nfcReader.startNfcScanner()
-
 
         // Building the UI
         setContent {
@@ -98,7 +91,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onResume() {
         super.onResume()
         Log.d("MainActivity", "onResume called")
-        nfcReader.enableNfcForegroundDispatch()
+        nfcReader?.enableNfcForegroundDispatch()
     }
 
     /*
@@ -110,7 +103,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onPause() {
         super.onPause()
         Log.d("MainActivity", "onPause called")
-        nfcReader.disableNfcForegroundDispatch()
+        nfcReader?.disableNfcForegroundDispatch()
     }
 
     /*
@@ -121,7 +114,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d("MainActivity", "onNewIntent called with action: ${intent.action}")
-        nfcReader.handleNfcIntent(intent)
+        nfcReader?.handleNfcIntent(intent)
     }
 
     /*
@@ -140,6 +133,9 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
 
 // Global variable to store the currently scanned item.
 var item: ItemData? = null
+
+// reader
+var nfcReader: NFCReader? = null
 
 
 /*
@@ -175,7 +171,11 @@ fun AppNavHost(navController: NavHostController) {
 @Composable
 fun MainScreen() {
     Column {
-        Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = Color.White)
+        if(nfcReader != null && nfcReader!!.isScanning){
+            Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+        } else {
+            ItemList()
+        }
     }
 }
 

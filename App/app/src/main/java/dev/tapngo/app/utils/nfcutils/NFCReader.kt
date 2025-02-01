@@ -1,5 +1,6 @@
 package dev.tapngo.app
 
+import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -24,6 +25,16 @@ class NFCReader(private val context: Context, private val nfcAdapter: NfcAdapter
 
     // Store this for a stupid reason
     var isScanning = false
+
+    init {
+        Log.d("NFCReader", "NFCReader initialized")
+        if(nfcAdapter == null) {
+            Log.e("NFCReader", "NFC Adapter is null")
+            Toast.makeText(context, "NFC is not enabled on this device.", Toast.LENGTH_LONG).show()
+        } else {
+            startNfcScanner()
+        }
+    }
 
     // Start the scanner.
     fun startNfcScanner() {
