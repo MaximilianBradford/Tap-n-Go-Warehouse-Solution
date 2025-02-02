@@ -9,12 +9,16 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,6 +28,9 @@ import androidx.navigation.navArgument
 import dev.tapngo.app.ui.theme.TapNGoTheme
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 
 /*
@@ -66,7 +73,9 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 // This scaffold holds the item popup.
                 // This is absolutely terrible. It is the equivalent of making a fixed div with a full width/height and setting display to none. ~Dan
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(modifier = Modifier.padding(innerPadding).padding(16.dp)) {
+                    Column(modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(16.dp)) {
                         Spacer(modifier = Modifier.height(16.dp))
                         // The item popup which is by default, hidden.
                         ItemPopup(
@@ -91,7 +100,9 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onResume() {
         super.onResume()
         Log.d("MainActivity", "onResume called")
-        nfcReader?.enableNfcForegroundDispatch()
+        window.decorView.post { //Getting persistent errors with nfcreader enabling before the system is ready. Trying this fix.
+            nfcReader?.enableNfcForegroundDispatch()
+        }
     }
 
     /*
@@ -139,45 +150,115 @@ var nfcReader: NFCReader? = null
 
 
 /*
- * Composable function to handle navigation
  *
- * This is pretty terrible. ~Dan
- * TODO - Research how to do this properly
  */
+// Class made with assitance from Claude AI to help with bottom bar button function.
+sealed class MainScreenState {
+    object NFCScan : MainScreenState()    // For NFC scanning screen
+    object ItemList : MainScreenState()    // For showing items
+}
+/*
+* Main screen composable
+*
+* Dynamic menu that can change the current function depending on user need.
+*/
 @Composable
-fun AppNavHost(navController: NavHostController) {
-    NavHost(navController, startDestination = "login") {
-        composable("login") { LoginScreen(navController) }
-        composable("main") { MainScreen() }
-        composable(
-            // Parameters aren't even used here... ~ Dan
-            // The item gets passed in as an object.
-            // Probably can remove itm but eh.. Can probably be used later for something.
-            "checkout/{sku}",
-            arguments = listOf(
-                navArgument("sku") { type = NavType.StringType }
-            )
-        ) {
-            CheckoutScreen(itemData = item!!)
+fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan) {
+    Column {
+        when (currentScreen) {
+            is MainScreenState.NFCScan -> {
+                if (nfcReader != null && nfcReader!!.isScanning) {
+                    Text(
+                        "Waiting for NFC...",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                else {
+                    Text(
+                        "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            is MainScreenState.ItemList -> {
+                ItemList()
+            }
         }
     }
 }
 
-/*
- * Main screen composable
- *
- * Literally just the default screen that says "Waiting for NFC..."
- */
 @Composable
-fun MainScreen() {
-    Column {
-        if(nfcReader != null && nfcReader!!.isScanning){
-            Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-        } else {
-            ItemList()
+fun AppNavHost(navController: NavHostController) {
+    var mainScreenState by remember { mutableStateOf<MainScreenState>(MainScreenState.ItemList) }
+
+    // variable that is kept constant across recomps
+    var isLoginScreen by remember { mutableStateOf(true) }
+
+    //Sets up a side effect that runs when navController changes, then updates isLoginScreen to true or false
+    LaunchedEffect(navController) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            isLoginScreen = destination.route == "login"
+        }
+    }
+
+    Scaffold(
+        bottomBar = {
+            if (!isLoginScreen) {
+                Log.d("App Bar", "Main App Bar Used")
+                BottomAppBar(
+                    actions = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            IconButton(onClick = { mainScreenState = MainScreenState.NFCScan }) {
+                                Icon(Icons.Filled.Nfc, contentDescription = "NFC menu")
+                            }
+                            IconButton(onClick = { mainScreenState = MainScreenState.ItemList }) {
+                                Icon(
+                                    Icons.Filled.Notes,
+                                    contentDescription = "Localized description",
+                                )
+                            }
+                        }
+                    },
+                )
+            } else {
+                Log.d("App Bar", "Login App Bar Used")
+                BottomAppBar(
+                    actions = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                        }
+                    },
+                )
+            }
+        },
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = "login",
+            modifier = Modifier.padding(padding)
+        ) {
+            composable("login") { LoginScreen(navController) }
+            composable("main") { MainScreen(mainScreenState) }
+            composable(
+                "checkout/{sku}",
+                arguments = listOf(
+                    navArgument("sku") { type = NavType.StringType }
+                )
+            ) {
+                CheckoutScreen(itemData = item!!)
+            }
         }
     }
 }
+
+
 
 // Cybersecurity is my passion! ~ Dan
 var authToken: String? = null
@@ -185,5 +266,5 @@ var authToken: String? = null
 
 // Constants for my testing servers ~ Dan
 //const val server = "10.0.2.2:8080" // Localhost
-const val server = "192.168.4.22:8080" // Desktop
+const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)
