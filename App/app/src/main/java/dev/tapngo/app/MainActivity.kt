@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -163,7 +164,7 @@ sealed class MainScreenState {
 * Dynamic menu that can change the current function depending on user need.
 */
 @Composable
-fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan) {
+fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan, navController: NavController) {
     Column {
         when (currentScreen) {
             is MainScreenState.NFCScan -> {
@@ -183,7 +184,20 @@ fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan) {
                 }
             }
             is MainScreenState.ItemList -> {
-                ItemList()
+                var selectedItem by remember { mutableStateOf<ItemData?>(null) }
+
+                ItemList(
+                    navController = navController,
+                    item = selectedItem,
+                    onItemSelected = { listItem ->
+
+                        val newItem = ItemData(
+                            id = listItem.id
+                        )
+                        selectedItem = newItem
+                        item = newItem
+                    }
+                )
             }
         }
     }
@@ -245,11 +259,12 @@ fun AppNavHost(navController: NavHostController) {
             modifier = Modifier.padding(padding)
         ) {
             composable("login") { LoginScreen(navController) }
-            composable("main") { MainScreen(mainScreenState) }
+            composable("main") { MainScreen(mainScreenState, navController) }
             composable(
                 "checkout/{sku}",
                 arguments = listOf(
-                    navArgument("sku") { type = NavType.StringType }
+                    navArgument("sku") { type = NavType.StringType },
+
                 )
             ) {
                 CheckoutScreen(itemData = item!!)
