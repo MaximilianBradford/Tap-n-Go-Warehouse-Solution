@@ -1,10 +1,13 @@
 package dev.tapngo.app
-
+//Claude used to debug glitch where pagenum changing would not update the page.
 
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +22,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -29,25 +34,29 @@ import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
+import kotlin.properties.Delegates
 
 //ToDo:  Finish Search Function
-//@Composable
-//fun ScrollContent(innerPadding: PaddingValues) {
-//    val range = 1..100
-//    LazyColumn(
-//        modifier = Modifier
-//            .fillMaxSize(),
-//        contentPadding = innerPadding,
-//        verticalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        items(range.count()) { index ->
-//            Text(text = "- List item number ${index + 1}")
-//        }
-//    }
-//}
+@Composable
+fun ScrollContent(innerPadding: PaddingValues) {
+    val range = 1..100
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentPadding = innerPadding,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(range.count()) { index ->
+            Text(text = "- List item number ${index + 1}")
+        }
+    }
+}
 // God forgive me if this makes everything insecure.
+
+
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun ItemList(
@@ -56,30 +65,81 @@ fun ItemList(
     onItemSelected: (ItemListData) -> Unit
 ) {
 
-    //as much as i hate to admit it, I had to get help from chatgpt on how to properly complete this function,
+    //as much as i hate to admit it, I had to get help from Claude on how to properly complete this function,
     // specifically how to pass the selected value back to main to be used for navigation.
+    val coroutineScope = rememberCoroutineScope()
     val itemList = remember { mutableStateListOf<ItemListData>() }
-    LazyColumn {
-        items(itemList) { listitem ->
-            ListItem(
-                itemListData = listitem,
-                onItemClick = {
-                    try {
-                        onItemSelected(listitem)
-                        navController.navigate("checkout/${listitem.sku}")
-                    } catch (e: Exception){
-                        Log.e("Navigation", "Failed to navigate: ${e.message}")
-                    }
 
+    val offNum = remember { mutableStateOf(0) }
+
+    suspend fun populateList(
+        offNum: Int
+        //searchfunc: String
+    ){
+        itemList.clear()
+        val items = withContext(Dispatchers.IO) { getItemList(offNum) }
+        itemList.addAll(items)
+    }
+
+
+    Column(
+        Modifier.fillMaxSize()
+    ) {
+        LazyColumn(
+            Modifier.weight(1f)
+        ) {
+
+            items(itemList) { listitem ->
+                ListItem(
+                    itemListData = listitem,
+                    onItemClick = {
+                        try {
+                            onItemSelected(listitem)
+                            navController.navigate("checkout/${listitem.sku}")
+                        } catch (e: Exception){
+                            Log.e("Navigation", "Failed to navigate: ${e.message}")
+                        }
+
+                    }
+                )
             }
-            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ){
+            Button(onClick = {
+                if (itemList.size >= 0){
+                    offNum.value+=10
+                }
+                Log.d("Next Button", "Next Button called")
+                Log.d("Pagenum", "${offNum}")
+                coroutineScope.launch {
+                    populateList(offNum.value)
+                }
+
+
+            } ) {Text("Next")}
+            Button(onClick = {
+                if (offNum.value >= 10){
+                    offNum.value-=10
+                }
+                Log.d("Previous Button", "Previous Button called")
+                Log.d("Pagenum", "${offNum}")
+                coroutineScope.launch {
+                    populateList(offNum.value)
+                }
+
+            } ) {Text("Previous") }
         }
     }
 
+
+
     LaunchedEffect(Unit) {
-        val items = withContext(Dispatchers.IO) { getItemList() }
-        itemList.addAll(items)
+        populateList(1)
     }
+
 
 
     //For Search Function
@@ -93,13 +153,15 @@ fun ItemList(
 }
 
 
-fun getItemList(): List<ItemListData> {
+fun getItemList(
+    offNum: Int
+): List<ItemListData> {
     val cookies = mutableListOf<Cookie>()
     cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
-
+    Log.d("Request Call", "http://$server/api/part/?search=&offset=${offNum}&limit=10&cascade=1&category=null&category_detail=true&location_detail=true")
     val request = HttpRequest(
         RequestMethod.GET,
-        "http://$server/api/part/?search=&offset=0&limit=25&cascade=1&category=null&category_detail=true&location_detail=true",
+        "http://$server/api/part/?search=&offset=${offNum}&limit=10&cascade=1&category=null&category_detail=true&location_detail=true",
         cookies,
         null,
         String::class.java
