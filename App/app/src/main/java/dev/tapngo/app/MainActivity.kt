@@ -261,13 +261,12 @@ fun AppNavHost(navController: NavHostController) {
             composable("login") { LoginScreen(navController) }
             composable("main") { MainScreen(mainScreenState, navController) }
             composable(
-                "checkout/{sku}",
+                "checkout/{id}",
                 arguments = listOf(
-                    navArgument("sku") { type = NavType.StringType },
-
+                    navArgument("id") { type = NavType.IntType },
                 )
-            ) {
-                CheckoutScreen(itemData = item!!)
+            ) { backStackEntry ->
+                CheckoutScreen(id = backStackEntry.arguments?.getInt("id")!!)
             }
         }
     }
