@@ -117,7 +117,7 @@ fun ItemList(
                     onItemClick = {
                         try {
                             onItemSelected(listitem)
-                            navController.navigate("checkout/${listitem.id}")
+                            navController.navigate("checkout/${listitem.sku}")
                         } catch (e: Exception){
                             Log.e("Navigation", "Failed to navigate: ${e.message}")
                         }
