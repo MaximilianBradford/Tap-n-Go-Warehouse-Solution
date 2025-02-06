@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
@@ -14,11 +15,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 
 @Composable
-fun ListItem(itemListData: ItemListData) {
+fun ListItem(
+    itemListData: ItemListData,
+    onItemClick: (ItemListData) -> Unit
+) {
     Row(
         modifier = Modifier
+            .clickable { onItemClick(itemListData) }
             .fillMaxWidth()
             .padding(8.dp),
+
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Image(

@@ -1,6 +1,7 @@
 package dev.tapngo.app
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 
 // The little popup right when you scan an item
@@ -50,6 +53,7 @@ fun ItemPopup(
                 Button(onClick = {
                     onDismiss()
                     // Funny thing about this is that the parameters aren't even used.
+                    Log.d("nfc press", "${item.sku}")
                     navController.navigate("checkout/${item.sku}")
                 }) {
                     Text("Continue")
