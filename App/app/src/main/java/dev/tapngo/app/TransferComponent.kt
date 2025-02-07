@@ -2,9 +2,11 @@ package dev.tapngo.app
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -52,19 +54,40 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
     }
 
     Column {
-        Box {
-            Button(onClick = { expandedFrom = true }) {
-                Text(text = selectedFromLocation?.name ?: "Transfer From")
+        Row {
+            Box(modifier = Modifier.weight(1f)) {
+                Button(onClick = { expandedFrom = true }) {
+                    Text(text = selectedFromLocation?.name ?: "Transfer From")
+                }
+                DropdownMenu(
+                    expanded = expandedFrom,
+                    onDismissRequest = { expandedFrom = false }
+                ) {
+                    itemData.locations?.forEach { location ->
+                        DropdownMenuItem(text = { Text(location.name) }, onClick = {
+                            selectedFromLocation = location
+                            expandedFrom = false
+                        })
+                    }
+                }
             }
-            DropdownMenu(
-                expanded = expandedFrom,
-                onDismissRequest = { expandedFrom = false }
-            ) {
-                itemData.locations?.forEach { location ->
-                    DropdownMenuItem(text = { Text(location.name) }, onClick = {
-                        selectedFromLocation = location
-                        expandedFrom = false
-                    })
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Box(modifier = Modifier.weight(1f)) {
+                Button(onClick = { expandedTo = true }) {
+                    Text(text = selectedToLocation?.name ?: "Transfer To")
+                }
+                DropdownMenu(
+                    expanded = expandedTo,
+                    onDismissRequest = { expandedTo = false }
+                ) {
+                    locations.forEach { location ->
+                        DropdownMenuItem(text = { Text(location.name) }, onClick = {
+                            selectedToLocation = location
+                            expandedTo = false
+                        })
+                    }
                 }
             }
         }
@@ -73,35 +96,23 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Pull From Location: ${it.name}", color = MaterialTheme.colorScheme.primary)
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Box {
-            Button(onClick = { expandedTo = true }) {
-                Text(text = selectedToLocation?.name ?: "Transfer To")
-            }
-            DropdownMenu(
-                expanded = expandedTo,
-                onDismissRequest = { expandedTo = false }
-            ) {
-                locations.forEach { location ->
-                    DropdownMenuItem(text = { Text(location.name) }, onClick = {
-                        selectedToLocation = location
-                        expandedTo = false
-                    })
-                }
-            }
-        }
+
         selectedToLocation?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Move To Location: ${it.name}", color = MaterialTheme.colorScheme.primary)
         }
+
         Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = quantity,
             onValueChange = { quantity = it },
             label = { Text("Quantity") },
             modifier = Modifier.fillMaxWidth()
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = {
                 coroutineScope.launch {
