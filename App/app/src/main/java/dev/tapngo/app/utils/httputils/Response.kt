@@ -1,5 +1,6 @@
 package dev.tapngo.app.utils.httputils
 
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
@@ -13,12 +14,12 @@ class Response<T>(val code: Int, val body: T) {
     }
 
     // If this gets called on a response that isn't a string, you will break some things.
-    fun getAsJson(): JsonObject? {
-        if(body is JsonObject) {
+    fun getAsJson(): JsonElement? {
+        if (body is JsonObject) {
             return body
         }
-        if(body is String) {
-            return JsonParser.parseString(body as String).asJsonObject
+        if (body is String) {
+            return JsonParser.parseString(body as String)
         }
         return null
     }
