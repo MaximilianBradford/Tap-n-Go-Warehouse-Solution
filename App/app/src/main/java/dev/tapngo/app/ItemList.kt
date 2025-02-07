@@ -2,25 +2,17 @@ package dev.tapngo.app
 //Claude used to debug glitch where pagenum changing would not update the page.
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager.Query
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -42,7 +34,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
-import kotlin.properties.Delegates
 
 //ToDo:  Finish Search Function
 @Composable
@@ -80,9 +71,9 @@ fun ItemList(
     suspend fun populateList(
         offNum: Int,
         searchfunc: String
-    ){
+    ) {
         itemList.clear()
-        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc ) }
+        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
     }
 
@@ -118,7 +109,7 @@ fun ItemList(
                         try {
                             onItemSelected(listitem)
                             navController.navigate("checkout/${listitem.sku}")
-                        } catch (e: Exception){
+                        } catch (e: Exception) {
                             Log.e("Navigation", "Failed to navigate: ${e.message}")
                         }
 
@@ -129,36 +120,37 @@ fun ItemList(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
-        ){
+        ) {
             var previousButtonActive = true
-            if (offNum.value <= 0){
+            if (offNum.value <= 0) {
                 previousButtonActive = false
             }
             var nextButtonActive = true
-            if (itemList.size <= 9){
+            if (itemList.size <= 9) {
                 nextButtonActive = false
             }
-            Button(onClick = {
-                offNum.value+=10
-                Log.d("Next Button", "Next Button called")
-                Log.d("Pagenum", "${offNum}")
-                coroutineScope.launch {
-                    populateList(offNum.value, searchQuery.value)
-                }
-            },
-                enabled = nextButtonActive
-            ) {Text("Next")}
             Button(
                 onClick = {
-                offNum.value-=10
-                Log.d("Previous Button", "Previous Button called")
-                Log.d("Pagenum", "${offNum}")
-                coroutineScope.launch {
-                    populateList(offNum.value, searchQuery.value)
-                }
-            },
+                    offNum.value += 10
+                    Log.d("Next Button", "Next Button called")
+                    Log.d("Pagenum", "${offNum}")
+                    coroutineScope.launch {
+                        populateList(offNum.value, searchQuery.value)
+                    }
+                },
+                enabled = nextButtonActive
+            ) { Text("Next") }
+            Button(
+                onClick = {
+                    offNum.value -= 10
+                    Log.d("Previous Button", "Previous Button called")
+                    Log.d("Pagenum", "${offNum}")
+                    coroutineScope.launch {
+                        populateList(offNum.value, searchQuery.value)
+                    }
+                },
                 enabled = previousButtonActive
-                ) {Text("Previous") }
+            ) { Text("Previous") }
         }
     }
 
@@ -167,7 +159,6 @@ fun ItemList(
     LaunchedEffect(Unit) {
         populateList(0, "")
     }
-
 
 
     //For Search Function
@@ -187,7 +178,6 @@ fun getItemList(
 ): List<ItemListData> {
     val cookies = mutableListOf<Cookie>()
     cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
-    Log.d("Request Call", "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=10&cascade=1&category=null&category_detail=true&location_detail=true")
     val request = HttpRequest(
         RequestMethod.GET,
         "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=10&cascade=1&category=null&category_detail=true&location_detail=true",
@@ -203,7 +193,7 @@ fun getItemList(
         return listOf()
     }
 
-    val jsonObject = response.getAsJson()
+    val jsonObject = response.getAsJson()!!.asJsonObject
     val results = jsonObject!!.get("results").asJsonArray
     val itemList = mutableListOf<ItemListData>()
     results.forEach {

@@ -1,6 +1,5 @@
 package dev.tapngo.app
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.NfcManager
@@ -15,10 +14,8 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -29,9 +26,6 @@ import androidx.navigation.navArgument
 import dev.tapngo.app.ui.theme.TapNGoTheme
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
 
 
 /*
@@ -53,6 +47,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // Entry point for the app.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        context = this
         Log.d("MainActivity", "onCreate called")
 
         // Get the NFC service and cast it to NfcManager to get the default adapter
@@ -74,9 +69,11 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 // This scaffold holds the item popup.
                 // This is absolutely terrible. It is the equivalent of making a fixed div with a full width/height and setting display to none. ~Dan
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(modifier = Modifier
-                        .padding(innerPadding)
-                        .padding(16.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .padding(16.dp)
+                    ) {
                         Spacer(modifier = Modifier.height(16.dp))
                         // The item popup which is by default, hidden.
                         ItemPopup(
@@ -136,7 +133,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
      */
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
-        if(data.isDigitsOnly()){
+        if (data.isDigitsOnly()) {
             item = InvenTreeUtils.getItemData(data.toInt())
             showDialog.value = true
         }
@@ -149,6 +146,7 @@ var item: ItemData? = null
 // reader
 var nfcReader: NFCReader? = null
 
+//var context: Context? = null
 
 /*
  *
@@ -158,13 +156,17 @@ sealed class MainScreenState {
     object NFCScan : MainScreenState()    // For NFC scanning screen
     object ItemList : MainScreenState()    // For showing items
 }
+
 /*
 * Main screen composable
 *
 * Dynamic menu that can change the current function depending on user need.
 */
 @Composable
-fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan, navController: NavController) {
+fun MainScreen(
+    currentScreen: MainScreenState = MainScreenState.NFCScan,
+    navController: NavController
+) {
     Column {
         when (currentScreen) {
             is MainScreenState.NFCScan -> {
@@ -174,8 +176,7 @@ fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan, navCont
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
-                }
-                else {
+                } else {
                     Text(
                         "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!",
                         style = MaterialTheme.typography.titleLarge,
@@ -183,6 +184,7 @@ fun MainScreen(currentScreen: MainScreenState = MainScreenState.NFCScan, navCont
                     )
                 }
             }
+
             is MainScreenState.ItemList -> {
                 var selectedItem by remember { mutableStateOf<ItemData?>(null) }
 
@@ -265,14 +267,13 @@ fun AppNavHost(navController: NavHostController) {
                 arguments = listOf(
                     navArgument("sku") { type = NavType.StringType },
 
-                )
+                    )
             ) {
-                CheckoutScreen(itemData = item!!)
+                CheckoutScreen(itemData = item!!, navController = navController)
             }
         }
     }
 }
-
 
 
 // Cybersecurity is my passion! ~ Dan
@@ -280,6 +281,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-//const val server = "10.0.2.2:8080" // Localhost
-const val server = "10.0.0.116:8080" // Desktop
+const val server = "10.0.2.2:8080" // Localhost
+//const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)

@@ -9,7 +9,13 @@ import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
 import java.net.HttpURLConnection
 
-class ItemListData(val id: Int, val sku: String, val description: String, var thumbnailUrl: String, val quantity: Int) {
+class ItemListData(
+    val id: Int,
+    val sku: String,
+    val description: String,
+    var thumbnailUrl: String,
+    val quantity: Int
+) {
     lateinit var thumbnail: ByteArray
 
     init {
@@ -22,14 +28,18 @@ class ItemListData(val id: Int, val sku: String, val description: String, var th
         cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
 
         // Get the image!!!
-        val imageRequest = HttpRequest(RequestMethod.GET, thumbnailUrl, cookies, null, ByteArray::class.java)
+        val imageRequest =
+            HttpRequest(RequestMethod.GET, thumbnailUrl, cookies, null, ByteArray::class.java)
 
-        if(imageRequest.getResponse().code == HttpURLConnection.HTTP_OK) {
+        if (imageRequest.getResponse().code == HttpURLConnection.HTTP_OK) {
             val imageData = imageRequest.getResponse().body
 
             this.thumbnail = imageData
         } else {
-            Log.e("MainActivity", "Error: Image request failed with response code ${imageRequest.getResponse().code}")
+            Log.e(
+                "MainActivity",
+                "Error: Image request failed with response code ${imageRequest.getResponse().code}"
+            )
         }
     }
 }

@@ -3,15 +3,18 @@ package dev.tapngo.app
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 
 // The little popup right when you scan an item
@@ -40,7 +43,11 @@ fun ItemPopup(
                     if (item.imageData != null) {
                         Image(
                             // Shoutout to android docs for this bit!! https://developer.android.com/reference/android/graphics/BitmapFactory
-                            bitmap = BitmapFactory.decodeByteArray(item.imageData, 0, item.imageData!!.size).asImageBitmap(),
+                            bitmap = BitmapFactory.decodeByteArray(
+                                item.imageData,
+                                0,
+                                item.imageData!!.size
+                            ).asImageBitmap(),
                             contentDescription = null,
                             modifier = Modifier.size(128.dp)
                         )

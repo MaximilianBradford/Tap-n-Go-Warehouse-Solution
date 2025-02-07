@@ -101,7 +101,8 @@ class NFCReader(
 
         if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action ||
             NfcAdapter.ACTION_TAG_DISCOVERED == intent.action ||
-            NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action) {
+            NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action
+        ) {
 
             val tag: Tag? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableExtra(NfcAdapter.EXTRA_TAG, Tag::class.java)
@@ -121,7 +122,8 @@ class NFCReader(
 
                         for (record in ndefMessage.records) {
                             if (record.tnf == NdefRecord.TNF_WELL_KNOWN &&
-                                record.type.contentEquals(NdefRecord.RTD_TEXT)) {
+                                record.type.contentEquals(NdefRecord.RTD_TEXT)
+                            ) {
 
                                 val payload = record.payload
                                 val textEncoding = if ((payload[0].toInt() and 0x80) == 0)
@@ -142,7 +144,8 @@ class NFCReader(
                         ndefTag.close()
                     } catch (e: IOException) {
                         Log.e("NFCReader", "Error reading NDEF message", e)
-                        Toast.makeText(activity, "Error reading NDEF message", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(activity, "Error reading NDEF message", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             }
