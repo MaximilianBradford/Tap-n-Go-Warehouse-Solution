@@ -1,3 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App Name -->
     <string name="app_name">TapNGo</string>
+
+    <!-- NFC Scanning -->
+    <string name="nfc_scan_prompt">Scan an NFC tag...</string>
+    <string name="nfc_scan_success">NFC tag scanned successfully!</string>
+    <string name="nfc_scan_failed">Failed to scan NFC tag. Try again.</string>
+
+    <!-- Buttons -->
+    <string name="button_scan_nfc">Scan NFC</string>
+    <string name="button_retry">Retry</string>
+    <string name="button_ok">OK</string>
+
+    <!-- Error Messages -->
+    <string name="error_nfc_not_supported">NFC is not supported on this device.</string>
+    <string name="error_nfc_disabled">NFC is disabled. Please enable it in settings.</string>
+    <string name="error_no_nfc_detected">No NFC tag detected. Try again.</string>
+
+    <!-- General -->
+    <string name="loading">Loading...</string>
+    <string name="processing">Processing...</string>
 </resources>
