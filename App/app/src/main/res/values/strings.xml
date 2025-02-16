@@ -2,6 +2,7 @@
 <resources>
     <!-- App Name -->
     <string name="app_name">TapNGo</string>
+    <string name="app_logo">Tap N Go Warehouse</string>
 
     <!-- NFC Scanning -->
     <string name="nfc_scan_prompt">Scan an NFC tag...</string>

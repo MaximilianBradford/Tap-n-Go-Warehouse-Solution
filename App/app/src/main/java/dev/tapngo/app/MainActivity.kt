@@ -5,6 +5,8 @@ import android.nfc.NfcAdapter
 import android.nfc.NfcManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -27,7 +29,7 @@ import androidx.compose.material3.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-
+import dev.tapngo.app.ui.InventoryActivity
 
 
 /*
@@ -95,6 +97,15 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         }
     }
 
+    // This is the method that will be called when the "Start" button is clicked
+    fun onStartButtonClicked(view: View) {
+        // Handle button click here (for example, show a toast message)
+        Toast.makeText(this, "Start Button Clicked", Toast.LENGTH_SHORT).show()
+
+        // Navigating to InventoryActivity
+        val intent = Intent(this, InventoryActivity::class.java)
+        startActivity(intent)
+    }
 
     /*
      * Enable NFC foreground dispatch when the activity is resumed
