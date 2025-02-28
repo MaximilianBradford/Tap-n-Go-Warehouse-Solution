@@ -2,7 +2,7 @@
 <resources>
 
     <!-- App Theme -->
-    <style name="Theme.TapNGo" parent="Theme.Material3Components.DayNight.NoActionBar">
+    <style name="Theme.TapNGo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary Colors -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>

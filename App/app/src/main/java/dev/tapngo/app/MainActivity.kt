@@ -167,7 +167,7 @@ var nfcReader: NFCReader? = null
 /*
  *
  */
-// Class made with assitance from Claude AI to help with bottom bar button function.
+// Class made with assistance from Claude AI to help with bottom bar button function.
 sealed class MainScreenState {
     object NFCScan : MainScreenState()    // For NFC scanning screen
     object ItemList : MainScreenState()    // For showing items
@@ -297,6 +297,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-const val server = "10.0.2.2:8080" // Localhost
+const val server = "10.0.2.2:8000" // Localhost
 //const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)
