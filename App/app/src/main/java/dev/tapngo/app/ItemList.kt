@@ -80,17 +80,20 @@ fun ItemList(
     //Claude helped debug why the
     @Composable
     fun SearchField(searchQuery: MutableState<String>) {
-
-        TextField(
-            value = searchQuery.value,
-            onValueChange = {
-                searchQuery.value = it
+        Row{
+            TextField(
+                value = searchQuery.value,
+                onValueChange = {
+                    searchQuery.value = it
+                },
+                label = { Text("Search Here") }
+            )
+            Button( onClick = {
                 coroutineScope.launch {
                     populateList(offNum.value, searchQuery.value)
-                }
-            },
-            label = { Text("Search Here") }
-        )
+                }}) {Text("Submit") }
+        }
+
     }
 
 
