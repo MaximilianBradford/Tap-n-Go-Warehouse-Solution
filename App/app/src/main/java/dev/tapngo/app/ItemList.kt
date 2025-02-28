@@ -2,11 +2,9 @@ package dev.tapngo.app
 //Claude used to debug glitch where pagenum changing would not update the page.
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager.Query
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,13 +13,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -46,7 +39,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
-import kotlin.properties.Delegates
 
 
 //ToDo:  Finish Search Function
@@ -85,9 +77,9 @@ fun ItemList(
     suspend fun populateList(
         offNum: Int,
         searchfunc: String
-    ){
+    ) {
         itemList.clear()
-        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc ) }
+        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
     }
     suspend fun extendList(
@@ -174,6 +166,7 @@ fun ItemList(
             },
             navController = navController
         )
+
     }
 //    Column(
 //        Modifier.fillMaxSize()
@@ -240,7 +233,6 @@ fun ItemList(
     }
 
 
-
     //For Search Function
     //    Scaffold(
 //        topBar = {
@@ -274,7 +266,7 @@ fun getItemList(
         return listOf()
     }
 
-    val jsonObject = response.getAsJson()
+    val jsonObject = response.getAsJson()!!.asJsonObject
     val results = jsonObject!!.get("results").asJsonArray
     val itemList = mutableListOf<ItemListData>()
     results.forEach {

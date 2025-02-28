@@ -323,7 +323,7 @@ class PluginsRegistry:
                 custom_dirs = get_plugin_dir()
 
                 # Load from user specified directories (unless in testing mode)
-                dirs.append('plugins')
+                dirs.append('plugin')
 
             if custom_dirs is not None:
                 # Allow multiple plugin directories to be specified

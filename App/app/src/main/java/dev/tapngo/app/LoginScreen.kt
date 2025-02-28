@@ -42,7 +42,11 @@ fun LoginScreen(navController: NavHostController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Login", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+        Text(
+            text = "Login",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
         Spacer(modifier = Modifier.height(16.dp))
         // Fields for text input
         OutlinedTextField(
@@ -74,7 +78,10 @@ fun LoginScreen(navController: NavHostController) {
         Button(
             onClick = {
                 if (username.isNotEmpty() && password.isNotEmpty()) {
-                    Log.d("LoginScreen", "Sending login request - Username: $username, Password: $password")
+                    Log.d(
+                        "LoginScreen",
+                        "Sending login request - Username: $username, Password: $password"
+                    )
                     InvenTreeUtils.sendLoginRequest(email, username, password) { key ->
                         if (key != null) {
                             authToken = key
