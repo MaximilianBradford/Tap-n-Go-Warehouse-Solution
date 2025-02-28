@@ -5,6 +5,8 @@ import android.nfc.NfcAdapter
 import android.nfc.NfcManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -26,6 +28,11 @@ import androidx.navigation.navArgument
 import dev.tapngo.app.ui.theme.TapNGoTheme
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import androidx.compose.material3.*
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import dev.tapngo.app.ui.InventoryActivity
 
 
 /*
@@ -90,6 +97,15 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         }
     }
 
+    // This is the method that will be called when the "Start" button is clicked
+    fun onStartButtonClicked(view: View) {
+        // Handle button click here (for example, show a toast message)
+        Toast.makeText(this, "Start Button Clicked", Toast.LENGTH_SHORT).show()
+
+        // Navigating to InventoryActivity
+        val intent = Intent(this, InventoryActivity::class.java)
+        startActivity(intent)
+    }
 
     /*
      * Enable NFC foreground dispatch when the activity is resumed
@@ -151,7 +167,7 @@ var nfcReader: NFCReader? = null
 /*
  *
  */
-// Class made with assitance from Claude AI to help with bottom bar button function.
+// Class made with assistance from Claude AI to help with bottom bar button function.
 sealed class MainScreenState {
     object NFCScan : MainScreenState()    // For NFC scanning screen
     object ItemList : MainScreenState()    // For showing items
@@ -281,6 +297,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-const val server = "10.0.2.2:8080" // Localhost
+const val server = "10.0.2.2:8000" // Localhost
 //const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)
