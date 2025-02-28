@@ -42,31 +42,35 @@ fun LoginScreen(navController: NavHostController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Login", style = MaterialTheme.typography.titleLarge, color = Color.White)
+        Text(
+            text = "Login",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
         Spacer(modifier = Modifier.height(16.dp))
         // Fields for text input
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email", color = Color.White) },
+            label = { Text("Email", color = MaterialTheme.colorScheme.primary) },
             modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(color = Color.White)
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
         )
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Username", color = Color.White) },
+            label = { Text("Username", color = MaterialTheme.colorScheme.primary) },
             modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(color = Color.White)
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password", color = Color.White) },
+            label = { Text("Password", color = MaterialTheme.colorScheme.primary) },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            textStyle = TextStyle(color = Color.White)
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.primary)
         )
         Spacer(modifier = Modifier.height(16.dp))
         // Login button
@@ -74,7 +78,10 @@ fun LoginScreen(navController: NavHostController) {
         Button(
             onClick = {
                 if (username.isNotEmpty() && password.isNotEmpty()) {
-                    Log.d("LoginScreen", "Sending login request - Username: $username, Password: $password")
+                    Log.d(
+                        "LoginScreen",
+                        "Sending login request - Username: $username, Password: $password"
+                    )
                     InvenTreeUtils.sendLoginRequest(email, username, password) { key ->
                         if (key != null) {
                             authToken = key
