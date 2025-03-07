@@ -38,6 +38,7 @@ import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,14 +60,14 @@ fun ScrollContent(innerPadding: PaddingValues) {
         }
     }
 }
-
+// God forgive me if this makes everything insecure.
 
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun ItemList(
     navController: NavController,
-    item: ItemData?,
+    //item: ItemData?,
     onItemSelected: (ItemListData) -> Unit
 ) {
 
@@ -95,6 +96,7 @@ fun ItemList(
     }
 
 
+    //Claude helped debug why the
     @Composable
     fun SearchField(searchQuery: MutableState<String>) {
         Row{
@@ -135,12 +137,13 @@ fun ItemList(
 
         LazyColumn(state = listState) {
             items(items) {
-                listitem ->
+                    listitem ->
                 ListItem(
                     itemListData = listitem,
                     onItemClick = {
                         try {
                             onItemSelected(listitem)
+                            Thread.sleep(300)
                             navController.navigate("checkout/${listitem.sku}")
                         } catch (e: Exception) {
                             Log.e("Navigation", "Failed to navigate: ${e.message}")

@@ -32,7 +32,14 @@ import androidx.compose.material3.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.lifecycle.ViewModel
+import dev.tapngo.app.barcode.Barcode
 import dev.tapngo.app.ui.InventoryActivity
+import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.IOException
 
 
 /*
@@ -150,7 +157,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
         if (data.isDigitsOnly()) {
-            item = InvenTreeUtils.getItemData(data.toInt())
+            item = getItemData(data.toInt())
             showDialog.value = true
         }
     }
@@ -169,8 +176,9 @@ var nfcReader: NFCReader? = null
  */
 // Class made with assistance from Claude AI to help with bottom bar button function.
 sealed class MainScreenState {
-    object NFCScan : MainScreenState()    // For NFC scanning screen
+    object NFCScan : MainScreenState() {}    // For NFC scanning screen
     object ItemList : MainScreenState()    // For showing items
+    object Barcode : MainScreenState()
 }
 
 /*
@@ -202,21 +210,24 @@ fun MainScreen(
             }
 
             is MainScreenState.ItemList -> {
-                var selectedItem by remember { mutableStateOf<ItemData?>(null) }
-
                 ItemList(
                     navController = navController,
-                    item = selectedItem,
+                    //item = selectedItem,
                     onItemSelected = { listItem ->
-
                         val newItem = ItemData(
                             id = listItem.id
                         )
-                        selectedItem = newItem
+                        //selectedItem = newItem
                         item = newItem
                     }
                 )
+
             }
+
+            is MainScreenState.Barcode -> {
+                Barcode(navController = navController)
+            }
+
         }
     }
 }
@@ -245,13 +256,25 @@ fun AppNavHost(navController: NavHostController) {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
                         ) {
-                            IconButton(onClick = { mainScreenState = MainScreenState.NFCScan }) {
+                            IconButton(onClick = { mainScreenState = MainScreenState.NFCScan; navController.popBackStack(route = "main", inclusive = false)
+                                Log.d("NavBar", "NFC Called")
+                            }) {
                                 Icon(Icons.Filled.Nfc, contentDescription = "NFC menu")
                             }
-                            IconButton(onClick = { mainScreenState = MainScreenState.ItemList }) {
+                            IconButton(onClick = { mainScreenState = MainScreenState.ItemList; navController.popBackStack(route = "main", inclusive = false)
+                            Log.d("NavBar", "ItemList Called")
+                            }) {
                                 Icon(
                                     Icons.Filled.Notes,
                                     contentDescription = "Localized description",
+                                )
+                            }
+                            IconButton(onClick = {mainScreenState = MainScreenState.Barcode; navController.popBackStack(route = "main", inclusive = false)
+                                Log.d("NavBar", "Barcode Called")
+                            }) {
+                                Icon(
+                                    Icons.Filled.Camera,
+                                    contentDescription = "Barcode Reader",
                                 )
                             }
                         }
@@ -284,12 +307,46 @@ fun AppNavHost(navController: NavHostController) {
                     navArgument("sku") { type = NavType.StringType },
 
                     )
+
             ) {
+                //Log.d("CheckoutDebug", "Before checkout: item = $item")
                 CheckoutScreen(itemData = item!!, navController = navController)
+            }
+            composable("barcode/{barcode_id}",
+                arguments = listOf(
+                    navArgument("barcode_id"){ type = NavType.StringType}
+                )
+                ) {
+                navBackStackEntry ->
+                val barcode_id = navBackStackEntry.arguments?.getString("barcode_id")
+                barcode_id?.let{
+                    barcode_id ->
+                    try{
+                        item = if (barcode_id != null && barcode_id != "null" && barcode_id.isNotBlank() && barcode_id.matches(Regex("\\d+"))) {
+                            getItemData(barcode_id.toInt())
+                        } else {
+                            null // or some default value
+                        }
+                    } catch (e: IOException){
+                        Log.e("Barcode", "Barcode scanner failed to retrieve item ${e.message}")
+                    }
+                    var showpop by remember {mutableStateOf(true)}
+                    if (item != null) {
+                        ItemPopup(
+                            showDialog = showpop,
+                            onDismiss = { showpop = false },
+                            item = item,
+                            navController = navController
+                        )
+                        //CheckoutScreen(itemData = item!!, navController = navController)
+                    } else {
+                        Text("Barcode Scan Failed, please try again")
+                    }
+                }
+                }
             }
         }
     }
-}
 
 
 // Cybersecurity is my passion! ~ Dan
@@ -297,6 +354,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-const val server = "10.0.2.2:8000" // Localhost
-//const val server = "10.0.0.116:8080" // Desktop
+//const val server = "10.0.2.2:8000" // Localhost
+const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)

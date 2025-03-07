@@ -1,6 +1,7 @@
 package dev.tapngo.app
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,7 @@ import dev.tapngo.app.utils.inventreeutils.components.ItemData
 @Composable
 fun CheckoutScreen(itemData: ItemData, navController: NavController) {
     val transfer = remember { mutableStateOf(false) }
+    Log.d("Check-out", "${itemData.sku}")
     TapNGoTheme {
         // I don't even center this one
         Column(modifier = Modifier.padding(16.dp)) {
