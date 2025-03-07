@@ -49,11 +49,11 @@
     <style name="CustomButtonStyle" parent="Widget.MaterialComponents.Button">
     <item name="android:backgroundTint">@color/button_primary</item>
         <item name="android:textColor">@color/button_text</item>
-        <item name="android:cornerRadius">8dp</item>
+        <item name="cornerRadius">8dp</item>
     </style>
 
     <!-- 📝 Custom Text Input Style -->
-    <style name="CustomTextInput" parent="Widget.Material.TextInputLayout.FilledBox"> <!-- ✅ FIXED -->
+    <style name="CustomTextInput" parent="Widget.Material3.TextInputLayout.FilledBox"> <!-- ✅ FIXED -->
         <item name="boxStrokeColor">@color/primary</item>
         <item name="boxBackgroundColor">@color/surface</item>
         <item name="android:textColorHint">@color/text_secondary</item>
@@ -61,8 +61,8 @@
 
     <!-- 📦 Custom CardView Style -->
     <style name="CustomCardStyle" parent="Widget.MaterialComponents.CardView">
-    <item name="android:cardBackgroundColor">@color/surface</item>
-        <item name="android:cardElevation">4dp</item>
+    <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardElevation">4dp</item>
         <item name="android:radius">12dp</item>
     </style>
 

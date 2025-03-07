@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import dev.tapngo.app.R
 import dev.tapngo.app.model.InventoryItem
+import dev.tapngo.app.ui.theme.NfcScanActivity
 
 class AddInventoryActivity : AppCompatActivity() {
 
