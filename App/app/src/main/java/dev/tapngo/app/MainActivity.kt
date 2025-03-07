@@ -38,8 +38,7 @@ import dev.tapngo.app.ui.InventoryActivity
  * This also contains the callback for the NFC reader.. Which I really wish I could move to the NFCReader class
  */
 class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
-    // NFC adapter
-    private var nfcAdapter: NfcAdapter? = null
+
 
     // Dialog state
     // I am so sorry... ~ Dan
@@ -157,6 +156,8 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
 // Global variable to store the currently scanned item.
 var item: ItemData? = null
 
+// NFC adapter
+private var nfcAdapter: NfcAdapter? = null
 
 /*
  * Composable function to handle navigation
@@ -191,7 +192,13 @@ fun AppNavHost(navController: NavHostController) {
 @Composable
 fun MainScreen() {
     Column {
-        Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = Color.White)
+        nfcAdapter?.let {
+            if(it.isEnabled) {
+                Text("Waiting for NFC...", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            } else {
+                InventoryActivity()
+            }
+        }
     }
 }
 
