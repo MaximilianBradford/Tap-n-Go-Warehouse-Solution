@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import dev.tapngo.app.R
-import dev.tapngo.app.model.InventoryItem // ✅ Missing import added
+import dev.tapngo.app.model.InventoryItem
 
 class InventoryAdapter(
     private val items: MutableList<InventoryItem>, // ✅ Changed to MutableList for dynamic updates
@@ -24,8 +24,7 @@ class InventoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InventoryViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.inventory_item, parent, false) // Uses your item layout
-        return InventoryViewHolder(view)
+            .inflate(R.layout.inventory_item, parent, false)   return InventoryViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: InventoryViewHolder, position: Int) {

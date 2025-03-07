@@ -1,4 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
 
-</selector>
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M50,0 A50,50 0 1,1 50,100 A50,50 0 1,1 50,0 Z"/>
+
+    <!-- NFC Signal Icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,40 L50,20 L70,40 M40,50 L50,40 L60,50"
+        android:strokeWidth="5"
+        android:strokeColor="#FFFFFF"/>
+
+    <!-- Warehouse Box -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M20,60 L80,60 L80,80 L20,80 Z"/>
+
+    <!-- Inventory Barcode Lines -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeColor="#000000"
+        android:pathData="M25,65 L25,75 M35,65 L35,75 M45,65 L45,75 M55,65 L55,75 M65,65 L65,75 M75,65 L75,75"/>
+</vector>

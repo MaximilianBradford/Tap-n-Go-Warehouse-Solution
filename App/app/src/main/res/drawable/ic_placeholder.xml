@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
 
-</selector>
+    <!-- Background Rectangle -->
+    <path
+        android:fillColor="#BDBDBD"
+        android:pathData="M4,4h40v40h-40z"/>
+
+    <!-- Placeholder Image Icon -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M8,34l9,-9 6,6 13,-13 4,4v14h-32z"/>
+
+    <!-- Placeholder Circle for Profile Image -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M16,19c2,0 4,-2 4,-4s-2,-4 -4,-4 -4,2 -4,4 2,4 4,4z"/>
+</vector>

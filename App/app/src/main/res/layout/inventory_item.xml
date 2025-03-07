@@ -54,8 +54,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="Edit"
             android:padding="8dp"
-            android:src="@drawable/ic_edit"
-            android:contentDescription="Edit" />
+            android:src="@drawable/ic_edit" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
