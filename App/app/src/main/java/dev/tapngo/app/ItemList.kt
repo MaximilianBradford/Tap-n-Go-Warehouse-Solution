@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -35,6 +38,7 @@ import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,7 +67,7 @@ fun ScrollContent(innerPadding: PaddingValues) {
 @Composable
 fun ItemList(
     navController: NavController,
-    item: ItemData?,
+    //item: ItemData?,
     onItemSelected: (ItemListData) -> Unit
 ) {
 
@@ -133,12 +137,13 @@ fun ItemList(
 
         LazyColumn(state = listState) {
             items(items) {
-                listitem ->
+                    listitem ->
                 ListItem(
                     itemListData = listitem,
                     onItemClick = {
                         try {
                             onItemSelected(listitem)
+                            Thread.sleep(300)
                             navController.navigate("checkout/${listitem.sku}")
                         } catch (e: Exception) {
                             Log.e("Navigation", "Failed to navigate: ${e.message}")
