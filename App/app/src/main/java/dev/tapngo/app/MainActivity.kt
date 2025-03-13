@@ -25,7 +25,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import dev.tapngo.app.ui.theme.TapNGoTheme
+//import dev.tapngo.app.ui.theme.TapNGoTheme
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import androidx.compose.material3.*
@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.lifecycle.ViewModel
+import com.example.compose.TapNGoTheme
 import dev.tapngo.app.barcode.Barcode
 import dev.tapngo.app.ui.InventoryActivity
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
