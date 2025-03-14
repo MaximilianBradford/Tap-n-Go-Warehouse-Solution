@@ -19,11 +19,12 @@ job_item_detail_urls = [
     path('<int:pk>/', views.JobItemDetail.as_view(), name='job-item-detail')
 ]
 
+
 job_urls = [
     # Job detail
     path('job/', include(job_detail_urls)),
     # Job items
-    path('job-item/', include(job_item_detail_urls)),
+    path('item/', include(job_item_detail_urls)),
     # Default to the job index page
     path('', views.JobIndex.as_view(), name='job-index'),
 ]
