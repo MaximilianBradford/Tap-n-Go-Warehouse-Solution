@@ -7,15 +7,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,9 +38,12 @@ import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
+
 
 //ToDo:  Finish Search Function
 @Composable
@@ -57,7 +67,7 @@ fun ScrollContent(innerPadding: PaddingValues) {
 @Composable
 fun ItemList(
     navController: NavController,
-    item: ItemData?,
+    //item: ItemData?,
     onItemSelected: (ItemListData) -> Unit
 ) {
 
@@ -76,83 +86,150 @@ fun ItemList(
         val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
     }
+    suspend fun extendList(
+        offNum: Int,
+        searchfunc: String
+    ){
+        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc ) }
+        itemList.addAll(items)
+
+    }
+
 
     //Claude helped debug why the
     @Composable
     fun SearchField(searchQuery: MutableState<String>) {
-
-        TextField(
-            value = searchQuery.value,
-            onValueChange = {
-                searchQuery.value = it
+        Row{
+            TextField(
+                value = searchQuery.value,
+                onValueChange = {
+                    searchQuery.value = it
+                },
+                label = { Text("Search Here") }
+            )
+            Button( onClick = {
                 coroutineScope.launch {
                     populateList(offNum.value, searchQuery.value)
-                }
-            },
-            label = { Text("Search Here") }
-        )
+                }}) {Text("Submit") }
+        }
+
     }
 
-
-    SearchField(searchQuery)
-    Column(
-        Modifier.fillMaxSize()
+    @Composable
+    fun EndlessLazyColumn(
+        items: List<ItemListData>,
+        loadMore: () -> Unit,
+        buffer: Int = 25,
+        navController: NavController
     ) {
-        LazyColumn(
-            Modifier.weight(1f)
-        ) {
+        val listState = rememberLazyListState()
 
-            items(itemList) { listitem ->
+        val reachedBottom: Boolean by remember{
+            derivedStateOf {
+                val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+                lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - buffer
+            }
+        }
+
+        LaunchedEffect(reachedBottom) {
+            if (reachedBottom) loadMore()
+        }
+
+        LazyColumn(state = listState) {
+            items(items) {
+                    listitem ->
                 ListItem(
                     itemListData = listitem,
                     onItemClick = {
                         try {
                             onItemSelected(listitem)
+                            Thread.sleep(300)
                             navController.navigate("checkout/${listitem.sku}")
                         } catch (e: Exception) {
                             Log.e("Navigation", "Failed to navigate: ${e.message}")
                         }
-
                     }
                 )
+                Spacer(modifier =  Modifier.height(8.dp))
             }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
-        ) {
-            var previousButtonActive = true
-            if (offNum.value <= 0) {
-                previousButtonActive = false
-            }
-            var nextButtonActive = true
-            if (itemList.size <= 9) {
-                nextButtonActive = false
-            }
-            Button(
-                onClick = {
-                    offNum.value += 10
-                    Log.d("Next Button", "Next Button called")
-                    Log.d("Pagenum", "${offNum}")
-                    coroutineScope.launch {
-                        populateList(offNum.value, searchQuery.value)
-                    }
-                },
-                enabled = nextButtonActive
-            ) { Text("Next") }
-            Button(
-                onClick = {
-                    offNum.value -= 10
-                    Log.d("Previous Button", "Previous Button called")
-                    Log.d("Pagenum", "${offNum}")
-                    coroutineScope.launch {
-                        populateList(offNum.value, searchQuery.value)
-                    }
-                },
-                enabled = previousButtonActive
-            ) { Text("Previous") }
+
         }
     }
+
+
+    SearchField(searchQuery)
+    Column(
+        Modifier.fillMaxWidth()
+    ){
+        EndlessLazyColumn(
+            items = itemList,
+            loadMore = {
+                offNum.value += 50
+                coroutineScope.launch {
+                    extendList(offNum.value, searchQuery.value)
+                }
+            },
+            navController = navController
+        )
+
+    }
+//    Column(
+//        Modifier.fillMaxSize()
+//    ) {
+//        LazyColumn(
+//            Modifier.weight(1f)
+//        ) {
+//
+//            items(itemList) { listitem ->
+//                ListItem(
+//                    itemListData = listitem,
+//                    onItemClick = {
+//                        try {
+//                            onItemSelected(listitem)
+//                            navController.navigate("checkout/${listitem.sku}")
+//                        } catch (e: Exception){
+//                            Log.e("Navigation", "Failed to navigate: ${e.message}")
+//                        }
+//
+//                    }
+//                )
+//            }
+//        }
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.End
+//        ){
+//            var previousButtonActive = true
+//            if (offNum.value <= 0){
+//                previousButtonActive = false
+//            }
+//            var nextButtonActive = true
+//            if (itemList.size <= 9){
+//                nextButtonActive = false
+//            }
+//            Button(onClick = {
+//                offNum.value+=10
+//                Log.d("Next Button", "Next Button called")
+//                Log.d("Pagenum", "${offNum}")
+//                coroutineScope.launch {
+//                    populateList(offNum.value, searchQuery.value)
+//                }
+//            },
+//                enabled = nextButtonActive
+//            ) {Text("Next")}
+//            Button(
+//                onClick = {
+//                offNum.value-=10
+//                Log.d("Previous Button", "Previous Button called")
+//                Log.d("Pagenum", "${offNum}")
+//                coroutineScope.launch {
+//                    populateList(offNum.value, searchQuery.value)
+//                }
+//            },
+//                enabled = previousButtonActive
+//                ) {Text("Previous") }
+//        }
+//    }
 
 
 
@@ -178,9 +255,10 @@ fun getItemList(
 ): List<ItemListData> {
     val cookies = mutableListOf<Cookie>()
     cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
+    Log.d("Request Call", "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true")
     val request = HttpRequest(
         RequestMethod.GET,
-        "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=10&cascade=1&category=null&category_detail=true&location_detail=true",
+        "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true",
         cookies,
         null,
         String::class.java
@@ -204,6 +282,7 @@ fun getItemList(
         val sku = obj.get("name").asString
         val description = obj.get("description").asString
         itemList.add(ItemListData(id, sku, description, thumbnailUrl, inStock))
+        Log.d("ItemList Data", "${obj} ${id} ${thumbnailUrl} ${inStock} ${sku} ${description} ")
     }
     return itemList
 }
