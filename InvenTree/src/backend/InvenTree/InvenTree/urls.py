@@ -29,6 +29,8 @@ import plugin.api
 import report.api
 import stock.api
 import users.api
+import job.api
+from job.urls import job_urls
 from build.urls import build_urls
 from common.urls import common_urls
 from company.urls import company_urls, manufacturer_part_urls, supplier_part_urls
@@ -104,6 +106,7 @@ classic_frontendpatterns = [
     path('order/', include(order_urls)),
     path('manufacturer-part/', include(manufacturer_part_urls)),
     path('part/', include(part_urls)),
+    path('job/', include(job_urls)),
     path('stock/', include(stock_urls)),
     path('supplier-part/', include(supplier_part_urls)),
     path('edit-user/', EditUserView.as_view(), name='edit-user'),
@@ -156,6 +159,7 @@ apipatterns = [
     path('machine/', include(machine.api.machine_api_urls)),
     path('order/', include(order.api.order_api_urls)),
     path('part/', include(part.api.part_api_urls)),
+    path('job/', include(job.api.job_api_urls)),
     path('report/', include(report.api.report_api_urls)),
     path('search/', APISearchView.as_view(), name='api-search'),
     path('settings/', include(common.api.settings_api_urls)),
