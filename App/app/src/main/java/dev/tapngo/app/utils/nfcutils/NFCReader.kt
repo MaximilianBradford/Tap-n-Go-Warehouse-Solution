@@ -1,5 +1,6 @@
 package dev.tapngo.app
 
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -20,7 +21,7 @@ import java.nio.charset.Charset
  * Class for the NFC reader.
  * Extremely gross.
  */
-class NFCReader(private val context: Context, private val nfcAdapter: NfcAdapter?, private val callback: NFCReaderCallback) {
+class NFCReader(private val context: Activity, private val nfcAdapter: NfcAdapter?, private val callback: NFCReaderCallback) {
 
     // Store this for a stupid reason
     var isScanning = false
@@ -29,7 +30,7 @@ class NFCReader(private val context: Context, private val nfcAdapter: NfcAdapter
     fun startNfcScanner() {
         Log.d("NFCReader", "startNfcScanner called")
         isScanning = true
-        enableNfcForegroundDispatch()
+//        enableNfcForegroundDispatch()
     }
 
     // I lied about above. THIS actually starts the scanner.
@@ -68,7 +69,7 @@ class NFCReader(private val context: Context, private val nfcAdapter: NfcAdapter
                 }
                 // Actually enable the reader!!!
                 adapter.enableForegroundDispatch(
-                    context as MainActivity, pendingIntent, nfcIntentFilter, null
+                    context, pendingIntent, nfcIntentFilter, null
                 )
             }
         }

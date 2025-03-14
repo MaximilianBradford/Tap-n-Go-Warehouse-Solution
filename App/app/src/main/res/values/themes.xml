@@ -39,7 +39,7 @@
     </style>
 
     <!-- 🌟 Splash Screen Theme -->
-    <style name="Theme.Splash" parent="Theme.Material3.DayNight"> <!-- ✅ FIXED -->
+    <style name="Theme.Splash" parent="Theme.Material3.DayNight.NoActionBar"> <!-- ✅ FIXED -->
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:statusBarColor">@android:color/black</item>

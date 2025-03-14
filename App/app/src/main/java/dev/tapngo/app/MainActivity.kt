@@ -50,6 +50,11 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // reader
     private lateinit var nfcReader: NFCReader
 
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
+
 
     // Entry point for the app.
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +67,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
 
         // I don't need a null check here since NFCReader handles it ~ Dan
 
+        Log.d(TAG, "nfcAdapter : $nfcAdapter")
         // Initialize the NFC reader... I can probably remove the "callback" parameter and just use context. ~ Dan
         nfcReader = NFCReader(this, nfcAdapter, this)
 
@@ -79,7 +85,9 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 // This scaffold holds the item popup.
                 // This is absolutely terrible. It is the equivalent of making a fixed div with a full width/height and setting display to none. ~Dan
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(modifier = Modifier.padding(innerPadding).padding(16.dp)) {
+                    Column(modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(16.dp)) {
                         Spacer(modifier = Modifier.height(16.dp))
                         // The item popup which is by default, hidden.
                         ItemPopup(
