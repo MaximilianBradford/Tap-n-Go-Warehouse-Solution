@@ -298,19 +298,4 @@ job_api_urls = [
             path('', JobIndex.as_view(), name='api-job-list'),
         ]),
     ),
-    path(
-        'address/',
-        include([
-            path('<int:pk>/', include([
-                path('', AddressDetail.as_view(), name='api-address-detail'),
-            ])),
-            path('', AddressViewSet.as_view({'get': 'list', 'post': 'create'}), name='api-address-list'),
-        ]),
-    ),
-    path(
-        'tech/',
-        include([
-            path('', JobTechViewSet.as_view({'get': 'list', 'post': 'create'}), name='api-jobtech-list'),
-        ]),
-    ),
 ]
