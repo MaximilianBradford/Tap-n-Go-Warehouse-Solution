@@ -12,13 +12,14 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import kotlin.concurrent.thread
 
-class ItemData(val id: Int) {
+class ItemData(val id: Int, val loc: Int?) {
     // Basic item data.
     var sku: String? = null
     var description: String? = null
     var imageUrl: String? = null
     var imageData: ByteArray? = null
     var locations: List<Location>? = null
+    var selectedLocation: Location? = null
 
     // Fetch item data from the server
     // THIS does run on another thread. however if this request fails, the app locks.
@@ -66,6 +67,10 @@ class ItemData(val id: Int) {
                         this.imageUrl = imgUrl
                         this.imageData = imageData
                         locations = InvenTreeUtils.getPartLocations(id)
+                        loc?.let {
+                            selectedLocation = locations?.find { it.id == loc }
+                        }
+
                     } else {
                         Log.e(
                             "MainActivity",

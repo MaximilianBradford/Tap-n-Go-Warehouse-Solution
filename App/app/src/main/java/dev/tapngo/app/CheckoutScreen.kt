@@ -61,7 +61,11 @@ fun CheckoutScreen(itemData: ItemData, navController: NavController) {
             itemData.locations?.let { LocationTable(it) }
             Spacer(modifier = Modifier.height(16.dp))
             if (transfer.value) {
-                TransferComponent(itemData, navController)
+                if(itemData.selectedLocation != null) {
+                    Text("Transfer directly from ${itemData.selectedLocation?.name}")
+                } else {
+                    TransferComponent(itemData, navController)
+                }
             } else {
                 Button(onClick = { transfer.value = true }) {
                     Text("Transfer")
