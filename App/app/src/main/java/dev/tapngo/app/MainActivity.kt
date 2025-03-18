@@ -158,7 +158,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
         if (data.isDigitsOnly()) {
-            val split = data.split("\n")
+            val split = data.split(":")
             item = getItemData(split[0].toInt(), split[1].toInt())
             showDialog.value = true
         }
