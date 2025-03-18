@@ -18,7 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.tapngo.app.ui.theme.TapNGoTheme
+import com.example.compose.TapNGoTheme
+//import dev.tapngo.app.ui.theme.TapNGoTheme
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 
 
