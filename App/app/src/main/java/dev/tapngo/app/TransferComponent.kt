@@ -57,7 +57,7 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
         Row {
             Box(modifier = Modifier.weight(1f)) {
                 Button(onClick = { expandedFrom = true }) {
-                    Text(text = selectedFromLocation?.name ?: "Transfer From")
+                    Text(text = selectedFromLocation?.name ?: "Select Location")
                 }
                 DropdownMenu(
                     expanded = expandedFrom,
@@ -76,7 +76,7 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
 
             Box(modifier = Modifier.weight(1f)) {
                 Button(onClick = { expandedTo = true }) {
-                    Text(text = selectedToLocation?.name ?: "Transfer To")
+                    Text(text = selectedToLocation?.name ?: "Select Job")
                 }
                 DropdownMenu(
                     expanded = expandedTo,

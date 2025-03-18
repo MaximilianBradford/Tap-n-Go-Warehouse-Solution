@@ -157,7 +157,8 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
         if (data.isDigitsOnly()) {
-            item = getItemData(data.toInt())
+            val split = data.split("\n")
+            item = getItemData(split[0].toInt(), split[1].toInt())
             showDialog.value = true
         }
     }
@@ -179,6 +180,7 @@ sealed class MainScreenState {
     object NFCScan : MainScreenState() {}    // For NFC scanning screen
     object ItemList : MainScreenState()    // For showing items
     object Barcode : MainScreenState()
+    object Job : MainScreenState()
 }
 
 /*
@@ -215,7 +217,8 @@ fun MainScreen(
                     //item = selectedItem,
                     onItemSelected = { listItem ->
                         val newItem = ItemData(
-                            id = listItem.id
+                            id = listItem.id,
+                            null
                         )
                         //selectedItem = newItem
                         item = newItem
@@ -226,6 +229,10 @@ fun MainScreen(
 
             is MainScreenState.Barcode -> {
                 Barcode(navController = navController)
+            }
+
+            is MainScreenState.Job -> {
+                JobListScreen(navController = navController)
             }
 
         }
@@ -265,7 +272,7 @@ fun AppNavHost(navController: NavHostController) {
                             Log.d("NavBar", "ItemList Called")
                             }) {
                                 Icon(
-                                    Icons.Filled.Notes,
+                                    Icons.Filled.FormatListNumberedRtl,
                                     contentDescription = "Localized description",
                                 )
                             }
@@ -275,6 +282,14 @@ fun AppNavHost(navController: NavHostController) {
                                 Icon(
                                     Icons.Filled.Camera,
                                     contentDescription = "Barcode Reader",
+                                )
+                            }
+                            IconButton(onClick = {mainScreenState = MainScreenState.Job; navController.popBackStack(route = "main", inclusive = false)
+                                Log.d("NavBar", "Job")
+                            }) {
+                                Icon(
+                                    Icons.Filled.Work,
+                                    contentDescription = "Job list",
                                 )
                             }
                         }
@@ -301,6 +316,7 @@ fun AppNavHost(navController: NavHostController) {
         ) {
             composable("login") { LoginScreen(navController) }
             composable("main") { MainScreen(mainScreenState, navController) }
+            composable("jobs") { JobListScreen(navController) }
             composable(
                 "checkout/{sku}",
                 arguments = listOf(
@@ -323,7 +339,7 @@ fun AppNavHost(navController: NavHostController) {
                     barcode_id ->
                     try{
                         item = if (barcode_id != null && barcode_id != "null" && barcode_id.isNotBlank() && barcode_id.matches(Regex("\\d+"))) {
-                            getItemData(barcode_id.toInt())
+                            getItemData(barcode_id.toInt(), null)
                         } else {
                             null // or some default value
                         }
