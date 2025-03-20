@@ -33,11 +33,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.tapngo.app.barcode.Barcode
 import dev.tapngo.app.ui.InventoryActivity
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -47,10 +50,10 @@ import java.io.IOException
  * All processes stem off of this.
  * This also contains the callback for the NFC reader.. Which I really wish I could move to the NFCReader class
  */
+
 class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // NFC adapter
     private var nfcAdapter: NfcAdapter? = null
-
     // Dialog state
     // I am so sorry... ~ Dan
     private val showDialog = mutableStateOf(false)
@@ -189,7 +192,7 @@ sealed class MainScreenState {
 @Composable
 fun MainScreen(
     currentScreen: MainScreenState = MainScreenState.NFCScan,
-    navController: NavController
+    navController: NavController,
 ) {
     Column {
         when (currentScreen) {
@@ -212,14 +215,6 @@ fun MainScreen(
             is MainScreenState.ItemList -> {
                 ItemList(
                     navController = navController,
-                    //item = selectedItem,
-                    onItemSelected = { listItem ->
-                        val newItem = ItemData(
-                            id = listItem.id
-                        )
-                        //selectedItem = newItem
-                        item = newItem
-                    }
                 )
 
             }
@@ -300,7 +295,9 @@ fun AppNavHost(navController: NavHostController) {
             modifier = Modifier.padding(padding)
         ) {
             composable("login") { LoginScreen(navController) }
-            composable("main") { MainScreen(mainScreenState, navController) }
+            composable("main") { MainScreen(
+                mainScreenState, navController,
+            ) }
             composable(
                 "checkout/{sku}",
                 arguments = listOf(
