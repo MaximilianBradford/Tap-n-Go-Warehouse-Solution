@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -27,19 +30,20 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.compose.surfaceDark
+import com.example.compose.surfaceLight
+import dev.tapngo.app.ui.NewSearchField
 import dev.tapngo.app.utils.httputils.Cookie
 import dev.tapngo.app.utils.httputils.CookieType
 import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
-import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
+import dev.tapngo.app.utils.setBothThemeColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
@@ -86,11 +90,12 @@ fun ItemList(
         val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
     }
+
     suspend fun extendList(
         offNum: Int,
         searchfunc: String
-    ){
-        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc ) }
+    ) {
+        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
 
     }
@@ -99,7 +104,7 @@ fun ItemList(
     //Claude helped debug why the
     @Composable
     fun SearchField(searchQuery: MutableState<String>) {
-        Row{
+        Row {
             TextField(
                 value = searchQuery.value,
                 onValueChange = {
@@ -107,13 +112,15 @@ fun ItemList(
                 },
                 label = { Text("Search Here") }
             )
-            Button( onClick = {
+            Button(onClick = {
                 coroutineScope.launch {
                     populateList(offNum.value, searchQuery.value)
-                }}) {Text("Submit") }
+                }
+            }) { Text("Submit") }
         }
 
     }
+
 
     @Composable
     fun EndlessLazyColumn(
@@ -124,7 +131,7 @@ fun ItemList(
     ) {
         val listState = rememberLazyListState()
 
-        val reachedBottom: Boolean by remember{
+        val reachedBottom: Boolean by remember {
             derivedStateOf {
                 val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
                 lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - buffer
@@ -135,32 +142,48 @@ fun ItemList(
             if (reachedBottom) loadMore()
         }
 
-        LazyColumn(state = listState) {
-            items(items) {
-                    listitem ->
-                ListItem(
-                    itemListData = listitem,
-                    onItemClick = {
-                        try {
-                            onItemSelected(listitem)
-                            Thread.sleep(300)
-                            navController.navigate("checkout/${listitem.sku}")
-                        } catch (e: Exception) {
-                            Log.e("Navigation", "Failed to navigate: ${e.message}")
+        LazyColumn(state = listState, modifier = Modifier.padding(16.dp)) {
+            items(items) { listItem ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = setBothThemeColor(
+                            lightColor = surfaceLight,
+                            darkColor = surfaceDark
+                        )
+                    )
+                ) {
+                    ListItem(
+                        itemListData = listItem,
+                        onItemClick = {
+                            try {
+                                onItemSelected(listItem)
+                                Thread.sleep(300)
+                                navController.navigate("checkout/${listItem.sku}")
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Failed to navigate: ${e.message}")
+                            }
                         }
-                    }
-                )
-                Spacer(modifier =  Modifier.height(8.dp))
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-
         }
     }
 
 
-    SearchField(searchQuery)
+    NewSearchField(searchQuery = searchQuery, onSubmit = {
+        coroutineScope.launch {
+            populateList(offNum.value, searchQuery.value)
+        }
+    })
+    Spacer(modifier = Modifier.height(8.dp))
     Column(
         Modifier.fillMaxWidth()
-    ){
+    ) {
         EndlessLazyColumn(
             items = itemList,
             loadMore = {
@@ -232,7 +255,6 @@ fun ItemList(
 //    }
 
 
-
     LaunchedEffect(Unit) {
         populateList(0, "")
     }
@@ -255,10 +277,13 @@ fun getItemList(
 ): List<ItemListData> {
     val cookies = mutableListOf<Cookie>()
     cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
-    Log.d("Request Call", "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true")
+    Log.d(
+        "Request Call",
+        "${InvenTreeUtils.HTTP_PROTOCOL}://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true"
+    )
     val request = HttpRequest(
         RequestMethod.GET,
-        "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true",
+        "${InvenTreeUtils.HTTP_PROTOCOL}://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true",
         cookies,
         null,
         String::class.java

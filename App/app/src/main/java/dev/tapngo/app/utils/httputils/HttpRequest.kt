@@ -30,6 +30,7 @@ class HttpRequest<T>(
             connection.doOutput = method == RequestMethod.POST
             connection.connectTimeout = 15000
             connection.readTimeout = 15000
+            connection.instanceFollowRedirects = true
 
             if (body != null && method == RequestMethod.POST) {
                 Log.d("HttpRequest", "Sending body: $body")
