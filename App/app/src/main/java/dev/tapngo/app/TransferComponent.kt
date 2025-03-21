@@ -58,17 +58,19 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
         }
     }
 
-    Column (
-        horizontalAlignment =  Alignment.CenterHorizontally
-    ){
-        Row (
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Box(modifier = Modifier.weight(1f).height(48.dp)) {
+        ) {
+            Box(modifier = Modifier
+                .weight(1f)
+                .height(48.dp)) {
                 Button(onClick = { expandedFrom = true }) {
                     Text(text = selectedFromLocation?.name ?: "Select Location")
                 }
@@ -87,7 +89,9 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Box(modifier = Modifier.weight(1f).height(48.dp)) {
+            Box(modifier = Modifier
+                .weight(1f)
+                .height(48.dp)) {
                 Button(onClick = { expandedTo = true }) {
                     Text(text = selectedToLocation?.name ?: "Select Job")
                 }
@@ -127,7 +131,9 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            modifier = Modifier.height(48.dp).fillMaxWidth(),
+            modifier = Modifier
+                .height(48.dp)
+                .fillMaxWidth(),
             onClick = {
                 coroutineScope.launch {
                     selectedFromLocation?.let { from ->

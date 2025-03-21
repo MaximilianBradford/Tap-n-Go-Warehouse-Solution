@@ -5,35 +5,35 @@ import android.graphics.Rect
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.view.PreviewView
 import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.LifecycleCameraController
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toComposeRect
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
 
 //Referenced from https://github.com/DUMA042/BarsandQ/tree/master
 @Composable
 fun ScanCode(
-    onQrCodeDetected:  (String) -> Unit, // Callback to handle detected QR/barcode
+    onQrCodeDetected: (String) -> Unit, // Callback to handle detected QR/barcode
     modifier: Modifier = Modifier
 ) {
     // State to hold the detected barcode value
@@ -67,8 +67,9 @@ fun ScanCode(
                         Barcode.FORMAT_CODE_93,
                         Barcode.FORMAT_CODE_39,
                         Barcode.FORMAT_CODE_128,
-                        Barcode.FORMAT_EAN_8,
-                        Barcode.FORMAT_EAN_13,
+//                        invalid formats for item ids
+//                        Barcode.FORMAT_EAN_8,
+//                        Barcode.FORMAT_EAN_13,
                         Barcode.FORMAT_AZTEC
                     )
                     .build()
@@ -97,7 +98,10 @@ fun ScanCode(
                             boundingRect = barcodeResults.first().boundingBox
 
                             // Log the bounding box for debugging purposes
-                            Log.d("Looking for Barcode ", barcodeResults.first().boundingBox.toString())
+                            Log.d(
+                                "Looking for Barcode ",
+                                barcodeResults.first().boundingBox.toString()
+                            )
                         }
                     }
                 )

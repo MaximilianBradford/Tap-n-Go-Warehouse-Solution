@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import dev.tapngo.app.R
 import org.json.JSONObject
@@ -45,7 +44,8 @@ class NfcActivity : AppCompatActivity() {
                 showErrorDialog("NFC Disabled", "Please enable NFC in settings.")
             } else {
                 isScanning = !isScanning
-                textView.text = if (isScanning) "Waiting for NFC Tag..." else "Tap an NFC tag to scan."
+                textView.text =
+                    if (isScanning) "Waiting for NFC Tag..." else "Tap an NFC tag to scan."
             }
         }
     }
@@ -54,11 +54,17 @@ class NfcActivity : AppCompatActivity() {
         super.onResume()
         if (nfcAdapter.isEnabled) {
             val intent = Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+            val pendingIntent =
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
             val filters = arrayOf(IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED))
 
             try {
-                nfcAdapter.enableForegroundDispatch(this, pendingIntent, filters, arrayOf(arrayOf(NfcA::class.java.name)))
+                nfcAdapter.enableForegroundDispatch(
+                    this,
+                    pendingIntent,
+                    filters,
+                    arrayOf(arrayOf(NfcA::class.java.name))
+                )
             } catch (e: Exception) {
                 Log.e("NFC", "Error enabling NFC: ${e.message}")
                 showErrorDialog("Error", "Failed to enable NFC scanning.")

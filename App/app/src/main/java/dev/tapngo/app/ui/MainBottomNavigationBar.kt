@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +34,6 @@ import com.example.compose.primaryLight
 import com.example.compose.secondaryDark
 import com.example.compose.secondaryLight
 import dev.tapngo.app.MainScreenState
-import dev.tapngo.app.utils.dynamicColor
 import dev.tapngo.app.utils.setBothThemeColor
 
 @Composable
@@ -96,6 +94,7 @@ fun BottomNavigationBar(
         }
     }
 }
+
 //
 //@Composable
 //fun BottomNavItem(
@@ -130,7 +129,10 @@ fun BottomNavItem(
             imageVector = icon,
             contentDescription = title,
             modifier = Modifier.size(24.dp),
-            tint = if (isSelected) setBothThemeColor(lightColor = primaryLight, darkColor = primaryDark) else setBothThemeColor(
+            tint = if (isSelected) setBothThemeColor(
+                lightColor = primaryLight,
+                darkColor = primaryDark
+            ) else setBothThemeColor(
                 lightColor = secondaryLight,
                 darkColor = secondaryDark
             )
@@ -138,7 +140,10 @@ fun BottomNavItem(
         Text(
             text = title,
             style = MaterialTheme.typography.bodySmall,
-            color = if (isSelected) setBothThemeColor(lightColor = primaryLight, darkColor = primaryDark) else setBothThemeColor(
+            color = if (isSelected) setBothThemeColor(
+                lightColor = primaryLight,
+                darkColor = primaryDark
+            ) else setBothThemeColor(
                 lightColor = secondaryLight,
                 darkColor = secondaryDark
             )
@@ -149,7 +154,10 @@ fun BottomNavItem(
 @Composable
 @Preview
 fun BottomNavigationBarPreview() {
-    BottomNavigationBar(navController = rememberNavController(), currentScreen = MainScreenState.ItemList) {
+    BottomNavigationBar(
+        navController = rememberNavController(),
+        currentScreen = MainScreenState.ItemList
+    ) {
 
     }
 }

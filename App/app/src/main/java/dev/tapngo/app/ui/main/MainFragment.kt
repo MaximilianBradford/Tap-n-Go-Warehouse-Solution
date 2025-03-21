@@ -1,12 +1,11 @@
 package dev.tapngo.app.ui.main
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import dev.tapngo.app.R
 
 class MainFragment : Fragment() {
@@ -23,8 +22,10 @@ class MainFragment : Fragment() {
         // TODO: Use the ViewModel
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 

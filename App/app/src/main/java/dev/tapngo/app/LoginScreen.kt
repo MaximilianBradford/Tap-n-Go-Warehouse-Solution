@@ -2,7 +2,6 @@ package dev.tapngo.app
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.components.BuildConfig
 import dev.tapngo.app.utils.dynamicColor
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 
@@ -111,7 +109,10 @@ fun LoginScreen(navController: NavHostController) {
         Button(
             onClick = {
                 if (username.isNotEmpty() && password.isNotEmpty()) {
-                    Log.d("LoginScreen", "Sending login request - Username: $username, Password: $password")
+                    Log.d(
+                        "LoginScreen",
+                        "Sending login request - Username: $username, Password: $password"
+                    )
                     InvenTreeUtils.sendLoginRequest(email, username, password) { key ->
                         if (key != null) {
                             authToken = key
@@ -128,9 +129,11 @@ fun LoginScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .height(56.dp)
         ) {
-            Text("Login", color = Color.White,
+            Text(
+                "Login", color = Color.White,
                 fontSize = 18.sp,  // Increase font size
-                fontWeight = FontWeight.Bold )
+                fontWeight = FontWeight.Bold
+            )
         }
 
         // Error handling

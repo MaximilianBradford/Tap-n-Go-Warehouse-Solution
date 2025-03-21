@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -30,19 +30,15 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.compose.surfaceDark
-import com.example.compose.surfaceLight
-import dev.tapngo.app.ui.NewSearchField
 import dev.tapngo.app.utils.httputils.Cookie
 import dev.tapngo.app.utils.httputils.CookieType
 import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
-import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
-import dev.tapngo.app.utils.setBothThemeColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,13 +62,53 @@ fun ScrollContent(innerPadding: PaddingValues) {
 }
 // God forgive me if this makes everything insecure.
 
+@Composable
+fun <T : Any> EndlessLazyColumn(
+    //loading: Boolean = false,
+    items: List<T>,
+    itemKey: (T) -> Any,
+    itemContent: @Composable (T) -> Unit,
+    loadingItem: @Composable () -> Unit,
+    loadMore: () -> Unit,
+    isLoadingMore: MutableState<Boolean> = remember { mutableStateOf(false) }
+) {
+    val listState = rememberLazyListState()
+    val buffer = 10
+    val reachedBottom: Boolean by remember {
+        derivedStateOf {
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+            lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - buffer
+        }
+    }
+
+    LaunchedEffect(reachedBottom) {
+        if (reachedBottom && !isLoadingMore.value) loadMore()
+    }
+
+    LazyColumn(state = listState) {
+        items(
+            items = items,
+            key = { item: T -> itemKey(item) }
+        ) { item ->
+            itemContent(item)
+        }
+
+        Log.d("LoadingDebug", "Before loading check in LazyColumn, isLoading: $isLoadingMore")
+        if (isLoadingMore.value) {
+            Log.d("LoadingDebug", "Adding loading item to LazyColumn")
+            item {
+                loadingItem()
+            }
+        }
+
+    }
+
+}
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun ItemList(
     navController: NavController,
-    //item: ItemData?,
-    onItemSelected: (ItemListData) -> Unit
 ) {
 
     //as much as i hate to admit it, I had to get help from Claude on how to properly complete this function,
@@ -81,23 +117,27 @@ fun ItemList(
     val itemList = remember { mutableStateListOf<ItemListData>() }
     val offNum = remember { mutableStateOf(0) }
     var searchQuery = remember { mutableStateOf("") }
+    val isLoadingMore = remember { mutableStateOf(false) }
 
     suspend fun populateList(
         offNum: Int,
         searchfunc: String
     ) {
         itemList.clear()
+        isLoadingMore.value = true
         val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
+        isLoadingMore.value = false
     }
 
     suspend fun extendList(
         offNum: Int,
         searchfunc: String
     ) {
+        isLoadingMore.value = true
         val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
-
+        isLoadingMore.value = false
     }
 
 
@@ -122,77 +162,34 @@ fun ItemList(
     }
 
 
-    @Composable
-    fun EndlessLazyColumn(
-        items: List<ItemListData>,
-        loadMore: () -> Unit,
-        buffer: Int = 25,
-        navController: NavController
-    ) {
-        val listState = rememberLazyListState()
-
-        val reachedBottom: Boolean by remember {
-            derivedStateOf {
-                val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-                lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - buffer
-            }
-        }
-
-        LaunchedEffect(reachedBottom) {
-            if (reachedBottom) loadMore()
-        }
-
-        LazyColumn(state = listState, modifier = Modifier.padding(16.dp)) {
-            items(items) { listItem ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = setBothThemeColor(
-                            lightColor = surfaceLight,
-                            darkColor = surfaceDark
-                        )
-                    )
-                ) {
-                    ListItem(
-                        itemListData = listItem,
-                        onItemClick = {
-                            try {
-                                onItemSelected(listItem)
-                                Thread.sleep(300)
-                                navController.navigate("checkout/${listItem.sku}")
-                            } catch (e: Exception) {
-                                Log.e("Navigation", "Failed to navigate: ${e.message}")
-                            }
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-
-
-    NewSearchField(searchQuery = searchQuery, onSubmit = {
-        coroutineScope.launch {
-            populateList(offNum.value, searchQuery.value)
-        }
-    })
-    Spacer(modifier = Modifier.height(8.dp))
+    SearchField(searchQuery)
     Column(
         Modifier.fillMaxWidth()
     ) {
         EndlessLazyColumn(
             items = itemList,
+            itemKey = { item: ItemListData -> item.id },
+            itemContent = { item: ItemListData ->
+                ListItem(
+                    itemListData = item,
+                    onItemClick = {
+                        try {
+                            navController.navigate("checkout/${item.sku}")
+                        } catch (e: Exception) {
+                            Log.e("Navigation", "Failed to navigate: ${e.message}")
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            },
+            loadingItem = { LoadingItem() },
             loadMore = {
                 offNum.value += 50
                 coroutineScope.launch {
                     extendList(offNum.value, searchQuery.value)
                 }
             },
-            navController = navController
+            isLoadingMore = isLoadingMore
         )
 
     }
@@ -270,6 +267,24 @@ fun ItemList(
 //    }
 }
 
+@Composable
+fun LoadingItem() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.width(64.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+
+}
+
 
 fun getItemList(
     offNum: Int,
@@ -279,11 +294,11 @@ fun getItemList(
     cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
     Log.d(
         "Request Call",
-        "${InvenTreeUtils.HTTP_PROTOCOL}://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true"
+        "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=25&cascade=1&category=null&category_detail=true&location_detail=true"
     )
     val request = HttpRequest(
         RequestMethod.GET,
-        "${InvenTreeUtils.HTTP_PROTOCOL}://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=50&cascade=1&category=null&category_detail=true&location_detail=true",
+        "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=25&cascade=1&category=null&category_detail=true&location_detail=true",
         cookies,
         null,
         String::class.java

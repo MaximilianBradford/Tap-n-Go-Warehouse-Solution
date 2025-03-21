@@ -1,10 +1,6 @@
 package dev.tapngo.app.utils.inventreeutils.components
 
 import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
-import dev.tapngo.app.CheckoutScreen
 import dev.tapngo.app.authToken
 import dev.tapngo.app.server
 import dev.tapngo.app.utils.httputils.Cookie

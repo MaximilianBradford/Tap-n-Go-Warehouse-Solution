@@ -4,13 +4,14 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+
 //Referenced from https://github.com/DUMA042/BarsandQ/tree/master
 @Composable
 fun ShowRationaleDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    title:String="Permission",
-    body:String="Permission needed"
+    title: String = "Permission",
+    body: String = "Permission needed"
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
