@@ -27,6 +27,7 @@ import kotlin.concurrent.thread
 class InvenTreeUtils {
     companion object {
 
+        val HTTP_PROTOCOL = "http"
 
         // This gets the item data from the server
         // Extremely unsafe, if request fails this can lock the thread... Which is currently the main thread...
@@ -61,7 +62,7 @@ class InvenTreeUtils {
                 try {
                     val request = HttpRequest(
                         RequestMethod.POST,
-                        "http://$server/api/auth/login/",
+                        "$HTTP_PROTOCOL://$server/api/auth/login/",
                         cookies,
                         body,
                         String::class.java
@@ -109,7 +110,7 @@ class InvenTreeUtils {
             cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
             val request = HttpRequest(
                 RequestMethod.GET,
-                "http://$server/api/stock/location/?structural=false&offset=$off&limit=$limit",
+                "$HTTP_PROTOCOL://$server/api/stock/location/?structural=false&offset=$off&limit=$limit",
                 cookies,
                 null,
                 String::class.java
@@ -146,7 +147,7 @@ class InvenTreeUtils {
 
             val request = HttpRequest(
                 RequestMethod.GET,
-                "http://$server/api/stock/?part=$id&in_stock=true&allow_variants=true&part_detail=true&location_detail=true",
+                "$HTTP_PROTOCOL://$server/api/stock/?part=$id&in_stock=true&allow_variants=true&part_detail=true&location_detail=true",
                 cookies,
                 null,
                 String::class.java
@@ -212,7 +213,7 @@ class InvenTreeUtils {
                 try {
                     val request = HttpRequest(
                         RequestMethod.POST,
-                        "http://$server/api/stock/transfer/",
+                        "$HTTP_PROTOCOL://$server/api/stock/transfer/",
                         cookies,
                         body,
                         String::class.java
@@ -247,7 +248,7 @@ class InvenTreeUtils {
 
             val request = HttpRequest(
                 RequestMethod.GET,
-                "http://$server/api/job/",
+                "$HTTP_PROTOCOL://$server/api/job/",
                 cookies,
                 null,
                 String::class.java
@@ -308,7 +309,7 @@ class InvenTreeUtils {
                 try {
                     val request = HttpRequest(
                         RequestMethod.POST,
-                        "http://$server/api/job/transfer/",
+                        "$HTTP_PROTOCOL://$server/api/job/transfer/",
                         cookies,
                         body,
                         String::class.java

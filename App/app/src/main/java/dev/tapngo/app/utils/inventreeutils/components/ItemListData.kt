@@ -16,7 +16,7 @@ class ItemListData(
     var thumbnailUrl: String,
     val quantity: Int
 ) {
-    lateinit var thumbnail: ByteArray
+     var thumbnail: ByteArray? = null
 
     init {
         // I expect there to never be a full url returned from above.. But who knows.

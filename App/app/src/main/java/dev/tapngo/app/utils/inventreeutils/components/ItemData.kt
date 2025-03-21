@@ -1,6 +1,10 @@
 package dev.tapngo.app.utils.inventreeutils.components
 
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import dev.tapngo.app.CheckoutScreen
 import dev.tapngo.app.authToken
 import dev.tapngo.app.server
 import dev.tapngo.app.utils.httputils.Cookie
@@ -32,7 +36,7 @@ class ItemData(val id: Int, val loc: Int?) {
                 // I literally yoinked this from my network tab.
                 val request = HttpRequest(
                     RequestMethod.GET,
-                    "http://$server/api/part/$id/?part_detail=true&location_detail=true",
+                    "${InvenTreeUtils.HTTP_PROTOCOL}://$server/api/part/$id/?part_detail=true&location_detail=true",
                     cookies,
                     null,
                     String::class.java
@@ -69,6 +73,7 @@ class ItemData(val id: Int, val loc: Int?) {
                         locations = InvenTreeUtils.getPartLocations(id)
                         loc?.let {
                             selectedLocation = locations?.find { it.id == loc }
+                            Log.d("ItemData", "Selected Location: ${selectedLocation?.id}")
                         }
 
                     } else {
@@ -88,3 +93,4 @@ class ItemData(val id: Int, val loc: Int?) {
         }
     }
 }
+

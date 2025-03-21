@@ -30,6 +30,7 @@ import dev.tapngo.app.ItemPopup
 import dev.tapngo.app.item
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
+import dev.tapngo.app.utils.setBothThemeColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,7 +62,7 @@ fun Barcode(modifier: Modifier = Modifier,
         Box(
             modifier = Modifier
                 .fillMaxSize() // Make the Box take up the entire screen
-                .background(Color.LightGray) // Optional: Add a background color for visibility
+                .background(setBothThemeColor(lightColor = Color.LightGray, darkColor = Color.Transparent)) // Optional: Add a background color for visibility
         ) {
             // Column to arrange UI elements vertically and center them
             Column(
