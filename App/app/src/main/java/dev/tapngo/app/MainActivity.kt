@@ -25,23 +25,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import dev.tapngo.app.ui.theme.TapNGoTheme
-import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
-import dev.tapngo.app.utils.inventreeutils.components.ItemData
-import androidx.compose.material3.*
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.example.compose.TapNGoTheme
 import dev.tapngo.app.barcode.Barcode
 import dev.tapngo.app.ui.InventoryActivity
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import java.io.IOException
 
 
@@ -54,6 +42,7 @@ import java.io.IOException
 class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // NFC adapter
     private var nfcAdapter: NfcAdapter? = null
+
     // Dialog state
     // I am so sorry... ~ Dan
     private val showDialog = mutableStateOf(false)
@@ -78,7 +67,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
 
         // Building the UI
         setContent {
-            TapNGoTheme {
+            TapNGoTheme() {
                 // Creating a basic nav controller.
                 // TODO - Store previous and current locations in a stack to allow for back navigation ~Dan
                 navController = rememberNavController()
@@ -158,9 +147,11 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
      * I wish the NFCReader class could be self contained... It probably can, but I've got no time ~ Dan
      */
     override fun onNfcDataRead(data: String) {
+        val regex = Regex("^\\d+:\\d+$")
         Log.d("MainActivity", "NFC data reads: $data")
-        if (data.isDigitsOnly()) {
-            item = getItemData(data.toInt())
+        if (regex.matches(data)) {
+            val split = data.split(":")
+            item = getItemData(split[0].toInt(), split[1].toInt())
             showDialog.value = true
         }
     }
@@ -182,6 +173,7 @@ sealed class MainScreenState {
     object NFCScan : MainScreenState() {}    // For NFC scanning screen
     object ItemList : MainScreenState()    // For showing items
     object Barcode : MainScreenState()
+    object Job : MainScreenState()
 }
 
 /*
@@ -223,6 +215,9 @@ fun MainScreen(
                 Barcode(navController = navController)
             }
 
+            is MainScreenState.Job -> {
+                JobListScreen(navController = navController)
+            }
         }
     }
 }
@@ -251,25 +246,53 @@ fun AppNavHost(navController: NavHostController) {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
                         ) {
-                            IconButton(onClick = { mainScreenState = MainScreenState.NFCScan; navController.popBackStack(route = "main", inclusive = false)
+                            IconButton(onClick = {
+                                mainScreenState =
+                                    MainScreenState.NFCScan; navController.popBackStack(
+                                route = "main",
+                                inclusive = false
+                            )
                                 Log.d("NavBar", "NFC Called")
                             }) {
                                 Icon(Icons.Filled.Nfc, contentDescription = "NFC menu")
                             }
-                            IconButton(onClick = { mainScreenState = MainScreenState.ItemList; navController.popBackStack(route = "main", inclusive = false)
-                            Log.d("NavBar", "ItemList Called")
+                            IconButton(onClick = {
+                                mainScreenState =
+                                    MainScreenState.ItemList; navController.popBackStack(
+                                route = "main",
+                                inclusive = false
+                            )
+                                Log.d("NavBar", "ItemList Called")
                             }) {
                                 Icon(
                                     Icons.Filled.Notes,
                                     contentDescription = "Localized description",
                                 )
                             }
-                            IconButton(onClick = {mainScreenState = MainScreenState.Barcode; navController.popBackStack(route = "main", inclusive = false)
+                            IconButton(onClick = {
+                                mainScreenState =
+                                    MainScreenState.Barcode; navController.popBackStack(
+                                route = "main",
+                                inclusive = false
+                            )
                                 Log.d("NavBar", "Barcode Called")
                             }) {
                                 Icon(
                                     Icons.Filled.Camera,
                                     contentDescription = "Barcode Reader",
+                                )
+                            }
+                            IconButton(onClick = {
+                                mainScreenState =
+                                    MainScreenState.Job; navController.popBackStack(
+                                route = "jobs",
+                                inclusive = false
+                            )
+                                Log.d("NavBar", "Job List Called")
+                            }) {
+                                Icon(
+                                    Icons.Filled.Work,
+                                    contentDescription = "Job List",
                                 )
                             }
                         }
@@ -295,9 +318,12 @@ fun AppNavHost(navController: NavHostController) {
             modifier = Modifier.padding(padding)
         ) {
             composable("login") { LoginScreen(navController) }
-            composable("main") { MainScreen(
-                mainScreenState, navController,
-            ) }
+            composable("main") {
+                MainScreen(
+                    mainScreenState, navController,
+                )
+            }
+            composable("jobs") { JobListScreen(navController = navController) }
             composable(
                 "checkout/{sku}",
                 arguments = listOf(
@@ -311,23 +337,25 @@ fun AppNavHost(navController: NavHostController) {
             }
             composable("barcode/{barcode_id}",
                 arguments = listOf(
-                    navArgument("barcode_id"){ type = NavType.StringType}
+                    navArgument("barcode_id") { type = NavType.StringType }
                 )
-                ) {
-                navBackStackEntry ->
+            ) { navBackStackEntry ->
                 val barcode_id = navBackStackEntry.arguments?.getString("barcode_id")
-                barcode_id?.let{
-                    barcode_id ->
-                    try{
-                        item = if (barcode_id != null && barcode_id != "null" && barcode_id.isNotBlank() && barcode_id.matches(Regex("\\d+"))) {
-                            getItemData(barcode_id.toInt())
-                        } else {
-                            null // or some default value
-                        }
-                    } catch (e: IOException){
+                barcode_id?.let { barcode_id ->
+                    try {
+                        item =
+                            if (barcode_id != null && barcode_id != "null" && barcode_id.isNotBlank() && barcode_id.matches(
+                                    Regex("\\d+")
+                                )
+                            ) {
+                                getItemData(barcode_id.toInt(), null)
+                            } else {
+                                null // or some default value
+                            }
+                    } catch (e: IOException) {
                         Log.e("Barcode", "Barcode scanner failed to retrieve item ${e.message}")
                     }
-                    var showpop by remember {mutableStateOf(true)}
+                    var showpop by remember { mutableStateOf(true) }
                     if (item != null) {
                         ItemPopup(
                             showDialog = showpop,
@@ -340,10 +368,10 @@ fun AppNavHost(navController: NavHostController) {
                         Text("Barcode Scan Failed, please try again")
                     }
                 }
-                }
             }
         }
     }
+}
 
 
 // Cybersecurity is my passion! ~ Dan
@@ -351,6 +379,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-//const val server = "10.0.2.2:8000" // Localhost
-const val server = "10.0.0.116:8080" // Desktop
+const val server = "10.0.2.2:8000" // Localhost
+//const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)

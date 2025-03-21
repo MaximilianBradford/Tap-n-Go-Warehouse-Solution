@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -75,7 +74,7 @@ fun <T : Any> EndlessLazyColumn(
 ) {
     val listState = rememberLazyListState()
     val buffer = 10
-    val reachedBottom: Boolean by remember{
+    val reachedBottom: Boolean by remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
             lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - buffer
@@ -89,9 +88,8 @@ fun <T : Any> EndlessLazyColumn(
     LazyColumn(state = listState) {
         items(
             items = items,
-            key = {item: T -> itemKey(item)}
-        ) {
-            item ->
+            key = { item: T -> itemKey(item) }
+        ) { item ->
             itemContent(item)
         }
 
@@ -131,12 +129,13 @@ fun ItemList(
         itemList.addAll(items)
         isLoadingMore.value = false
     }
+
     suspend fun extendList(
         offNum: Int,
         searchfunc: String
-    ){
+    ) {
         isLoadingMore.value = true
-        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc ) }
+        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
         itemList.addAll(items)
         isLoadingMore.value = false
     }
@@ -145,7 +144,7 @@ fun ItemList(
     //Claude helped debug why the
     @Composable
     fun SearchField(searchQuery: MutableState<String>) {
-        Row{
+        Row {
             TextField(
                 value = searchQuery.value,
                 onValueChange = {
@@ -153,10 +152,11 @@ fun ItemList(
                 },
                 label = { Text("Search Here") }
             )
-            Button( onClick = {
+            Button(onClick = {
                 coroutineScope.launch {
                     populateList(offNum.value, searchQuery.value)
-                }}) {Text("Submit") }
+                }
+            }) { Text("Submit") }
         }
 
     }
@@ -165,7 +165,7 @@ fun ItemList(
     SearchField(searchQuery)
     Column(
         Modifier.fillMaxWidth()
-    ){
+    ) {
         EndlessLazyColumn(
             items = itemList,
             itemKey = { item: ItemListData -> item.id },
@@ -175,7 +175,7 @@ fun ItemList(
                     onItemClick = {
                         try {
                             navController.navigate("checkout/${item.sku}")
-                        } catch (e: Exception){
+                        } catch (e: Exception) {
                             Log.e("Navigation", "Failed to navigate: ${e.message}")
                         }
                     }
@@ -252,7 +252,6 @@ fun ItemList(
 //    }
 
 
-
     LaunchedEffect(Unit) {
         populateList(0, "")
     }
@@ -275,7 +274,7 @@ fun LoadingItem() {
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         CircularProgressIndicator(
             modifier = Modifier.width(64.dp),
             color = MaterialTheme.colorScheme.secondary,
@@ -293,7 +292,10 @@ fun getItemList(
 ): List<ItemListData> {
     val cookies = mutableListOf<Cookie>()
     cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
-    Log.d("Request Call", "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=25&cascade=1&category=null&category_detail=true&location_detail=true")
+    Log.d(
+        "Request Call",
+        "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=25&cascade=1&category=null&category_detail=true&location_detail=true"
+    )
     val request = HttpRequest(
         RequestMethod.GET,
         "http://$server/api/part/?search=${searchfunc}&offset=${offNum}&limit=25&cascade=1&category=null&category_detail=true&location_detail=true",
