@@ -161,8 +161,9 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
      * I wish the NFCReader class could be self contained... It probably can, but I've got no time ~ Dan
      */
     override fun onNfcDataRead(data: String) {
+        val regex = Regex("^\\d+:\\d+$")
         Log.d("MainActivity", "NFC data reads: $data")
-        if (data.isDigitsOnly()) {
+        if (regex.matches(data)) {
             val split = data.split(":")
             item = getItemData(split[0].toInt(), split[1].toInt())
             showDialog.value = true

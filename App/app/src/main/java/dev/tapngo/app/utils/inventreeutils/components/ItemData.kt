@@ -73,6 +73,7 @@ class ItemData(val id: Int, val loc: Int?) {
                         locations = InvenTreeUtils.getPartLocations(id)
                         loc?.let {
                             selectedLocation = locations?.find { it.id == loc }
+                            Log.d("ItemData", "Selected Location: ${selectedLocation?.id}")
                         }
 
                     } else {
