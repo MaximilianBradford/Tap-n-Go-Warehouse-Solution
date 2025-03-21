@@ -11,11 +11,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
@@ -33,12 +38,15 @@ fun ListItem(
 
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        val bitmap = remember {
+            runCatching {
+                itemListData.thumbnail?.let {
+                    BitmapFactory.decodeByteArray(it, 0, it.size).asImageBitmap()
+                }
+            }.getOrNull()
+        }
         Image(
-            bitmap = BitmapFactory.decodeByteArray(
-                itemListData.thumbnail,
-                0,
-                itemListData.thumbnail.size
-            ).asImageBitmap(),
+            painter = bitmap?.let { BitmapPainter(it) } ?: rememberVectorPainter(Icons.Filled.BrokenImage),
             contentDescription = null,
             modifier = Modifier.size(48.dp)
         )

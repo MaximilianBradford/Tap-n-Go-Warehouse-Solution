@@ -12,7 +12,9 @@ import dev.tapngo.app.utils.httputils.Cookie
 import dev.tapngo.app.utils.httputils.CookieType
 import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
+import dev.tapngo.app.utils.inventreeutils.components.Address
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.inventreeutils.components.Job
 import dev.tapngo.app.utils.inventreeutils.components.Location
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,12 +27,13 @@ import kotlin.concurrent.thread
 class InvenTreeUtils {
     companion object {
 
+        val HTTP_PROTOCOL = "http"
 
         // This gets the item data from the server
         // Extremely unsafe, if request fails this can lock the thread... Which is currently the main thread...
         // TODO - MORE THREADS!!!
-        fun getItemData(id: Int): ItemData {
-            val itemData = ItemData(id)
+        fun getItemData(id: Int, loc: Int?): ItemData {
+            val itemData = ItemData(id, loc)
             while (itemData.sku == null || itemData.description == null || itemData.imageData == null) {
                 Thread.sleep(100)
             }
@@ -59,7 +62,7 @@ class InvenTreeUtils {
                 try {
                     val request = HttpRequest(
                         RequestMethod.POST,
-                        "http://$server/api/auth/login/",
+                        "$HTTP_PROTOCOL://$server/api/auth/login/",
                         cookies,
                         body,
                         String::class.java
@@ -107,7 +110,7 @@ class InvenTreeUtils {
             cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
             val request = HttpRequest(
                 RequestMethod.GET,
-                "http://$server/api/stock/location/?structural=false&offset=$off&limit=$limit",
+                "$HTTP_PROTOCOL://$server/api/stock/location/?structural=false&offset=$off&limit=$limit",
                 cookies,
                 null,
                 String::class.java
@@ -144,7 +147,7 @@ class InvenTreeUtils {
 
             val request = HttpRequest(
                 RequestMethod.GET,
-                "http://$server/api/stock/?part=$id&in_stock=true&allow_variants=true&part_detail=true&location_detail=true",
+                "$HTTP_PROTOCOL://$server/api/stock/?part=$id&in_stock=true&allow_variants=true&part_detail=true&location_detail=true",
                 cookies,
                 null,
                 String::class.java
@@ -210,7 +213,7 @@ class InvenTreeUtils {
                 try {
                     val request = HttpRequest(
                         RequestMethod.POST,
-                        "http://$server/api/stock/transfer/",
+                        "$HTTP_PROTOCOL://$server/api/stock/transfer/",
                         cookies,
                         body,
                         String::class.java
@@ -235,6 +238,106 @@ class InvenTreeUtils {
                     Log.e("TransferItem", "Error sending transfer request", e)
                 }
             }
+        }
+
+        fun getUserJobs(): List<Job> {
+            val jobs: MutableList<Job> = mutableListOf()
+
+            val cookies = mutableListOf<Cookie>()
+            cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
+
+            val request = HttpRequest(
+                RequestMethod.GET,
+                "$HTTP_PROTOCOL://$server/api/job/",
+                cookies,
+                null,
+                String::class.java
+            )
+
+            val response = request.getResponse()
+
+            if (response.code != HttpURLConnection.HTTP_OK) {
+                Log.d("JobList", "Error: Request failed with response code ${response.code}")
+                return jobs
+            }
+
+            val jsonArray = response.getAsJson()!!.asJsonArray
+
+            jsonArray.forEach { job ->
+                val obj = job.asJsonObject
+                val id = obj.get("job_id").asInt
+                val name = obj.get("name").asString
+                val description = obj.get("description").asString
+                val status = obj.get("status").asInt
+                val addressJson = obj.get("address").asJsonObject
+                val address = Address(
+                    addressJson.get("id").asInt,
+                    addressJson.get("street").asString,
+                    addressJson.get("city").asString,
+                    addressJson.get("state").asString,
+                    addressJson.get("zip_code").asString,
+                    addressJson.get("country").asString
+                )
+                val job = Job(id, address, status, name, description)
+                jobs.add(job)
+            }
+
+            return jobs
+        }
+
+        fun transferItemJob(
+            from: Location,
+            to: Job,
+            amount: Int,
+            navController: NavController
+        ) {
+            val cookies = mutableListOf<Cookie>()
+            cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
+            val body = JsonObject()
+
+            val itemJson = JsonObject()
+            itemJson.addProperty("pk", from.getPk())
+            itemJson.addProperty("quantity", amount)
+
+            val itemsArray = JsonArray()
+            itemsArray.add(itemJson)
+
+            body.add("items", itemsArray)
+            body.addProperty("job", to.id)
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val request = HttpRequest(
+                        RequestMethod.POST,
+                        "$HTTP_PROTOCOL://$server/api/job/transfer/",
+                        cookies,
+                        body,
+                        String::class.java
+                    )
+                    val response = request.getResponse()
+                    Log.d("TransferItem", "Response Code: ${response.code}")
+                    Log.d("TransferItem", "Response: ${response.body}")
+
+                    withContext(Dispatchers.Main) {
+                        if (response.code >= 200 && response.code < 300) {
+                            Log.d("TransferItem", "Transfer successful")
+                            navController.navigate("main")
+                        } else {
+                            Log.e(
+                                "TransferItem",
+                                "Transfer failed with response code ${response.code}"
+                            )
+                        }
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    Log.e("TransferItem", "Error sending transfer request", e)
+                }
+            }
+        }
+
+        fun adjustPartStock(itemData: ItemData, newcount: Int) {
+
         }
     }
 }

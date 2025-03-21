@@ -1,11 +1,13 @@
 package dev.tapngo.app
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -20,10 +22,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.Location
@@ -53,11 +58,19 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
         }
     }
 
-    Column {
-        Row {
-            Box(modifier = Modifier.weight(1f)) {
+    Column (
+        horizontalAlignment =  Alignment.CenterHorizontally
+    ){
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Box(modifier = Modifier.weight(1f).height(48.dp)) {
                 Button(onClick = { expandedFrom = true }) {
-                    Text(text = selectedFromLocation?.name ?: "Transfer From")
+                    Text(text = selectedFromLocation?.name ?: "Select Location")
                 }
                 DropdownMenu(
                     expanded = expandedFrom,
@@ -74,9 +87,9 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f).height(48.dp)) {
                 Button(onClick = { expandedTo = true }) {
-                    Text(text = selectedToLocation?.name ?: "Transfer To")
+                    Text(text = selectedToLocation?.name ?: "Select Job")
                 }
                 DropdownMenu(
                     expanded = expandedTo,
@@ -114,6 +127,7 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
+            modifier = Modifier.height(48.dp).fillMaxWidth(),
             onClick = {
                 coroutineScope.launch {
                     selectedFromLocation?.let { from ->
@@ -132,4 +146,18 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             Text("Confirm")
         }
     }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun TransferComponentPreview() {
+    val dummyItem = ItemData(id = 1, loc = null).apply {
+        sku = "12345XYZ"
+        description = "Sample Item for Checkout"
+    }
+
+    val mockNavController = rememberNavController() // Mock NavController for preview
+
+    TransferComponent(itemData = dummyItem, navController = mockNavController)
 }

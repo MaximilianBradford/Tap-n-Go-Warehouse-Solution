@@ -1,6 +1,10 @@
 package dev.tapngo.app.utils.inventreeutils.components
 
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import dev.tapngo.app.CheckoutScreen
 import dev.tapngo.app.authToken
 import dev.tapngo.app.server
 import dev.tapngo.app.utils.httputils.Cookie
@@ -12,13 +16,14 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import kotlin.concurrent.thread
 
-class ItemData(val id: Int) {
+class ItemData(val id: Int, val loc: Int?) {
     // Basic item data.
     var sku: String? = null
     var description: String? = null
     var imageUrl: String? = null
     var imageData: ByteArray? = null
     var locations: List<Location>? = null
+    var selectedLocation: Location? = null
 
     // Fetch item data from the server
     // THIS does run on another thread. however if this request fails, the app locks.
@@ -31,7 +36,7 @@ class ItemData(val id: Int) {
                 // I literally yoinked this from my network tab.
                 val request = HttpRequest(
                     RequestMethod.GET,
-                    "http://$server/api/part/$id/?part_detail=true&location_detail=true",
+                    "${InvenTreeUtils.HTTP_PROTOCOL}://$server/api/part/$id/?part_detail=true&location_detail=true",
                     cookies,
                     null,
                     String::class.java
@@ -66,6 +71,11 @@ class ItemData(val id: Int) {
                         this.imageUrl = imgUrl
                         this.imageData = imageData
                         locations = InvenTreeUtils.getPartLocations(id)
+                        loc?.let {
+                            selectedLocation = locations?.find { it.id == loc }
+                            Log.d("ItemData", "Selected Location: ${selectedLocation?.id}")
+                        }
+
                     } else {
                         Log.e(
                             "MainActivity",
@@ -83,3 +93,4 @@ class ItemData(val id: Int) {
         }
     }
 }
+

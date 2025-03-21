@@ -459,7 +459,7 @@
     $("#show-qr-code").click(function() {
         showQRDialog(
             '{% trans "Part QR Code" escape %}',
-            `{% clean_barcode part.barcode %}`
+            {% comment %} `{% clean_barcode part.barcode %}` {% endcomment %}
         );
     });
 
