@@ -27,7 +27,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.compose.TapNGoTheme
 import dev.tapngo.app.barcode.Barcode
+import dev.tapngo.app.ui.ErrorScreen
 import dev.tapngo.app.ui.InventoryActivity
+import dev.tapngo.app.ui.LoadingScreen
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import java.io.IOException
@@ -190,17 +192,9 @@ fun MainScreen(
         when (currentScreen) {
             is MainScreenState.NFCScan -> {
                 if (nfcReader != null && nfcReader!!.isScanning) {
-                    Text(
-                        "Waiting for NFC...",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    LoadingScreen(loadingMessage = "Waiting for NFC Tag...")
                 } else {
-                    Text(
-                        "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    ErrorScreen(errorMessage = "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!")
                 }
             }
 
