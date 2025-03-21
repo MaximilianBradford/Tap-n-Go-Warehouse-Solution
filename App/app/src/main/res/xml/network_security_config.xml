@@ -10,6 +10,5 @@
         <domain includeSubdomains="true">10.250.100.42</domain>
         <domain includeSubdomains="true">10.0.0.116</domain>
         <domain includeSubdomains="true">192.168.4.21</domain>
-        <domain includeSubdomains="true">9cff-2401-4900-85a9-d6ff-4091-1e04-80f1-ab76.ngrok-free.app</domain>
     </domain-config>
 </network-security-config>

@@ -46,8 +46,8 @@ fun LoginScreen(navController: NavHostController) {
     // Some states for login screen information
     // Yes, I did just hardcode the credentials... I'm not typing out my password every time I test this
     var username by remember { mutableStateOf("admin") }
-    var password by remember { mutableStateOf("admin") }
-    var email by remember { mutableStateOf("contact@danielj.dev") }
+    var password by remember { mutableStateOf("inventree") }
+    var email by remember { mutableStateOf("admin@tapngo.com") }
     var errorMessage by remember { mutableStateOf("") }
 
     // This column just slaps stuff in the center of the screen.
