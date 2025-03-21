@@ -10,7 +10,7 @@ import dev.tapngo.app.R
 import dev.tapngo.app.adapter.InventoryAdapter
 import dev.tapngo.app.model.InventoryItem
 
-class InventoryActivity : AppCompatActivity(){
+class InventoryActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var inventoryAdapter: InventoryAdapter
     private val inventoryList = mutableListOf<InventoryItem>()  // ✅ Mutable list for updates
@@ -31,7 +31,7 @@ class InventoryActivity : AppCompatActivity(){
             )
         )
 
-        inventoryAdapter = InventoryAdapter(inventoryList) { item : InventoryItem->
+        inventoryAdapter = InventoryAdapter(inventoryList) { item: InventoryItem ->
             openEditInventoryActivity(item)
         }
 
@@ -67,6 +67,7 @@ class InventoryActivity : AppCompatActivity(){
             }
         }
     }
+
     companion object {
         private const val EDIT_ITEM_REQUEST_CODE = 100
     }

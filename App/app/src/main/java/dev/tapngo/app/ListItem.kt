@@ -46,7 +46,8 @@ fun ListItem(
             }.getOrNull()
         }
         Image(
-            painter = bitmap?.let { BitmapPainter(it) } ?: rememberVectorPainter(Icons.Filled.BrokenImage),
+            painter = bitmap?.let { BitmapPainter(it) }
+                ?: rememberVectorPainter(Icons.Filled.BrokenImage),
             contentDescription = null,
             modifier = Modifier.size(48.dp)
         )

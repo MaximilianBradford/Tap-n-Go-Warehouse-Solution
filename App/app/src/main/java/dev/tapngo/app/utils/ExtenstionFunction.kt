@@ -15,6 +15,6 @@ fun dynamicColor(lightColor: () -> Color, darkColor: () -> Color): Color {
 }
 
 @Composable
-fun setBothThemeColor(lightColor : Color, darkColor : Color): Color {
+fun setBothThemeColor(lightColor: Color, darkColor: Color): Color {
     return if (isSystemInDarkTheme()) darkColor else lightColor
 }

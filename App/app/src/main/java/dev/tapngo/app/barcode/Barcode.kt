@@ -1,46 +1,39 @@
 package dev.tapngo.app.barcode
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import androidx.compose.runtime.Composable
-import com.google.accompanist.permissions.shouldShowRationale
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import android.Manifest
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.mlkit.vision.barcode.common.Barcode
-import dev.tapngo.app.ItemPopup
-import dev.tapngo.app.item
-import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
-import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import dev.tapngo.app.utils.setBothThemeColor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.IOException
 
 //Referenced from https://github.com/DUMA042/BarsandQ/tree/master
 @OptIn(ExperimentalPermissionsApi::class) // Opt-in to use experimental permissions API
 @Composable
-fun Barcode(modifier: Modifier = Modifier,
-            navController: NavController) {
+fun Barcode(
+    modifier: Modifier = Modifier,
+    navController: NavController
+) {
 
     // State to hold the scanned barcode value, saved across recompositions
     var barcode by rememberSaveable { mutableStateOf<String?>("No Code Scanned") }
@@ -62,7 +55,12 @@ fun Barcode(modifier: Modifier = Modifier,
         Box(
             modifier = Modifier
                 .fillMaxSize() // Make the Box take up the entire screen
-                .background(setBothThemeColor(lightColor = Color.LightGray, darkColor = Color.Transparent)) // Optional: Add a background color for visibility
+                .background(
+                    setBothThemeColor(
+                        lightColor = Color.LightGray,
+                        darkColor = Color.Transparent
+                    )
+                ) // Optional: Add a background color for visibility
         ) {
             // Column to arrange UI elements vertically and center them
             Column(

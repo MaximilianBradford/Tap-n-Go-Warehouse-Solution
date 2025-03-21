@@ -8,7 +8,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import dev.tapngo.app.R
-import dev.tapngo.app.model.InventoryItem
 
 class EditInventoryActivity : AppCompatActivity() {
     private lateinit var itemNameEditText: EditText

@@ -1,9 +1,15 @@
 package dev.tapngo.app
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -45,12 +51,19 @@ fun JobItem(job: Job) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = job.name, style = MaterialTheme.typography.titleLarge)
-                Text(text = statusText, color = statusColor, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = statusText,
+                    color = statusColor,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = job.description, style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${job.address.city}, ${job.address.state}", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${job.address.city}, ${job.address.state}",
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "${job.address.zip}", style = MaterialTheme.typography.bodyMedium)
         }
