@@ -1,5 +1,6 @@
 package dev.tapngo.app
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.inventreeutils.components.Job
 import dev.tapngo.app.utils.inventreeutils.components.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,8 +41,9 @@ import kotlinx.coroutines.withContext
 @Composable
 fun TransferComponent(itemData: ItemData, navController: NavController) {
     var locations by remember { mutableStateOf<List<Location>>(emptyList()) }
+    var jobs by remember { mutableStateOf<List<Job>>(emptyList()) }
     var selectedFromLocation by remember { mutableStateOf<Location?>(null) }
-    var selectedToLocation by remember { mutableStateOf<Location?>(null) }
+    var selectedToJob by remember { mutableStateOf<Job?>(null) }
     var expandedFrom by remember { mutableStateOf(false) }
     var expandedTo by remember { mutableStateOf(false) }
     var quantity by remember { mutableStateOf(TextFieldValue("")) }
@@ -49,18 +52,26 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
     suspend fun getData() {
         locations = withContext(Dispatchers.IO) {
             InvenTreeUtils.getLocationList(null, null)
+
+        }
+    }
+
+    suspend fun getJobs() {
+        jobs = withContext(Dispatchers.IO) {
+            InvenTreeUtils.getUserJobs()
         }
     }
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            getData()
-        }
+        getData()
+        getJobs()
+        Log.d("TransferComponent", "Jobs: $jobs")
     }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -68,23 +79,27 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(modifier = Modifier
-                .weight(1f)
-                .height(48.dp)) {
-                Button(onClick = { expandedFrom = true }) {
-                    Text(text = selectedFromLocation?.name ?: "Select Location")
-                }
-                DropdownMenu(
-                    expanded = expandedFrom,
-                    onDismissRequest = { expandedFrom = false }
-                ) {
-                    itemData.locations?.forEach { location ->
-                        DropdownMenuItem(text = { Text(location.name) }, onClick = {
-                            selectedFromLocation = location
-                            expandedFrom = false
-                        })
+            if(itemData.selectedLocation == null) {
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)) {
+                    Button(onClick = { expandedFrom = true }) {
+                        Text(text = selectedFromLocation?.name ?: "Select Location")
+                    }
+                    DropdownMenu(
+                        expanded = expandedFrom,
+                        onDismissRequest = { expandedFrom = false }
+                    ) {
+                        itemData.locations?.forEach { location ->
+                            DropdownMenuItem(text = { Text(location.name) }, onClick = {
+                                selectedFromLocation = location
+                                expandedFrom = false
+                            })
+                        }
                     }
                 }
+            } else {
+                Text(text = "Location: ${itemData.selectedLocation?.name}", color = MaterialTheme.colorScheme.primary)
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -93,15 +108,15 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
                 .weight(1f)
                 .height(48.dp)) {
                 Button(onClick = { expandedTo = true }) {
-                    Text(text = selectedToLocation?.name ?: "Select Job")
+                    Text(text = selectedToJob?.name ?: "Select Job")
                 }
                 DropdownMenu(
                     expanded = expandedTo,
                     onDismissRequest = { expandedTo = false }
                 ) {
-                    locations.forEach { location ->
-                        DropdownMenuItem(text = { Text(location.name) }, onClick = {
-                            selectedToLocation = location
+                    jobs.forEach { job ->
+                        DropdownMenuItem(text = { Text(job.name) }, onClick = {
+                            selectedToJob = job
                             expandedTo = false
                         })
                     }
@@ -114,9 +129,9 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             Text(text = "Pull From Location: ${it.name}", color = MaterialTheme.colorScheme.primary)
         }
 
-        selectedToLocation?.let {
+        selectedToJob?.let {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Move To Location: ${it.name}", color = MaterialTheme.colorScheme.primary)
+            Text(text = "Move To Job: ${it.name}", color = MaterialTheme.colorScheme.primary)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -137,16 +152,16 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             onClick = {
                 coroutineScope.launch {
                     selectedFromLocation?.let { from ->
-                        selectedToLocation?.let { to ->
+                        selectedToJob?.let { to ->
                             val qty = quantity.text.toIntOrNull() ?: 0
                             if (qty > 0) {
-                                InvenTreeUtils.transferItemWH(from, to, qty, navController)
+                                InvenTreeUtils.transferItemJob(itemData, from, to, qty, navController)
                             }
                         }
                     }
                 }
             },
-            enabled = selectedFromLocation != null && selectedToLocation != null && (quantity.text.toIntOrNull()
+            enabled = selectedFromLocation != null && selectedToJob != null && (quantity.text.toIntOrNull()
                 ?: 0) > 0
         ) {
             Text("Confirm")

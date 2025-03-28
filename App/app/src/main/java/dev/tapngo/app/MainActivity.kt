@@ -164,6 +164,10 @@ var item: ItemData? = null
 // reader
 var nfcReader: NFCReader? = null
 
+fun updateItem(itemData: ItemData) {
+    item = itemData
+}
+
 //var context: Context? = null
 
 /*
@@ -325,7 +329,10 @@ fun AppNavHost(navController: NavHostController) {
                     )
 
             ) {
-                //Log.d("CheckoutDebug", "Before checkout: item = $item")
+                Log.d("CheckoutDebug", "Before checkout: item = $item")
+                while (item == null) { // Hacky, but eh.. It works.
+                    Thread.sleep(100)
+                }
                 CheckoutScreen(itemData = item!!, navController = navController)
             }
             composable("barcode/{barcode_id}",
@@ -341,6 +348,7 @@ fun AppNavHost(navController: NavHostController) {
                                     Regex("\\d+")
                                 )
                             ) {
+                                getPartFromStockNo(barcode_id.toInt())
                             } else {
                                 null // or some default value
                             }

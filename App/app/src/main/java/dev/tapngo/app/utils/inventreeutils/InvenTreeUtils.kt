@@ -327,7 +327,42 @@ class InvenTreeUtils {
             return itemData
         }
 
-        fun transferItemJob(
+        fun getStockPart(itemData: ItemData, loc: Int): ItemData? {
+
+            val cookies = mutableListOf<Cookie>()
+            cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
+
+            val request = HttpRequest(
+                RequestMethod.GET,
+                "$HTTP_PROTOCOL://$server/api/stock/?part=${itemData.id}&location=$loc&SKU=${itemData.sku}",
+                cookies,
+                null,
+                String::class.java
+            )
+
+            val response = request.getResponse()
+
+            if (response.code != HttpURLConnection.HTTP_OK) {
+                Log.d("StockItem", "Error: Request failed with response code ${response.code}")
+                return itemData
+            }
+
+            val jsonArray = response.getAsJson()!!.asJsonArray
+
+            if(jsonArray.isEmpty) {
+                return null
+            }
+
+            val jsonObject = jsonArray[0].asJsonObject
+            val stockItemId = jsonObject.get("pk").asInt
+            val item = ItemData(itemData.id, loc)
+            item.quantity = jsonObject.get("quantity").asInt
+            item.stockItemId = stockItemId
+
+            return item
+        }
+
+        suspend fun transferItemJob(
             itemData: ItemData,
             to: Job,
             amount: Int,
@@ -342,7 +377,7 @@ class InvenTreeUtils {
             transferItemJob(itemData, itemData.selectedLocation!!, to, amount, navController)
         }
 
-        fun transferItemJob(
+        suspend fun transferItemJob(
             itemData: ItemData,
             from: Location,
             to: Job,
@@ -351,17 +386,26 @@ class InvenTreeUtils {
         ) {
             val cookies = mutableListOf<Cookie>()
             cookies.add(Cookie(CookieType.AUTHORIZATION, "Token $authToken"))
-            val body = JsonObject()
 
+            val stockItem = withContext(Dispatchers.IO) {
+                getStockPart(itemData, from.id)
+            }
+
+            if (stockItem == null) {
+                Log.e("TransferItem", "Error: Stock item not found")
+                return
+            }
+
+            val body = JsonObject()
             body.addProperty("job", to.id)
-            body.addProperty("stock_item", itemData.stockItemId)
+            body.addProperty("stock_item", stockItem.stockItemId!!)
             body.addProperty("quantity", amount)
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val request = HttpRequest(
                         RequestMethod.POST,
-                        "$HTTP_PROTOCOL://$server/api/job/transfer/",
+                        "$HTTP_PROTOCOL://$server/api/job/${to.id}/items/transfer/",
                         cookies,
                         body,
                         String::class.java
@@ -375,10 +419,7 @@ class InvenTreeUtils {
                             Log.d("TransferItem", "Transfer successful")
                             navController.navigate("main")
                         } else {
-                            Log.e(
-                                "TransferItem",
-                                "Transfer failed with response code ${response.code}"
-                            )
+                            Log.e("TransferItem", "Transfer failed with response code ${response.code}")
                         }
                     }
                 } catch (e: IOException) {

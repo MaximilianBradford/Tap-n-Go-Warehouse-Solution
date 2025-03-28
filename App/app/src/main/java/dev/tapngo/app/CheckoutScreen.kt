@@ -1,6 +1,5 @@
 package dev.tapngo.app
 
-//import dev.tapngo.app.ui.theme.TapNGoTheme
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -41,57 +40,6 @@ import dev.tapngo.app.utils.setBothThemeColor
 
 
 // Checkout screen component
-//@Composable
-//fun CheckoutScreen(itemData: ItemData, navController: NavController) {
-//    val transfer = remember { mutableStateOf(false) }
-//    Log.d("Check-out", "${itemData.sku}")
-//    TapNGoTheme {
-//        // I don't even center this one
-//        Column(modifier = Modifier.padding(16.dp)) {
-//            Text(
-//                text = "Checkout",
-//                style = MaterialTheme.typography.titleLarge,
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            // It's safe to assume that the itemData is not null
-//            // Even if it is, theoretically the following values will just simply not appear.
-//            Text(text = "SKU: ${itemData.sku}", color = MaterialTheme.colorScheme.primary)
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text(
-//                text = "Description: ${itemData.description}",
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            if (itemData.imageData != null) {
-//                Image(
-//                    bitmap = BitmapFactory.decodeByteArray(
-//                        itemData.imageData,
-//                        0,
-//                        itemData.imageData!!.size
-//                    ).asImageBitmap(),
-//                    contentDescription = null,
-//                    modifier = Modifier.size(128.dp)
-//                )
-//            }
-//            Spacer(modifier = Modifier.height(16.dp))
-//            itemData.locations?.let { LocationTable(it) }
-//            Spacer(modifier = Modifier.height(16.dp))
-//            if (transfer.value) {
-//                if(itemData.selectedLocation != null) {
-//                    Text("Transfer directly from ${itemData.selectedLocation?.name}")
-//                } else {
-//                    TransferComponent(itemData, navController)
-//                }
-//            } else {
-//                Button(onClick = { transfer.value = true }) {
-//                    Text("Transfer")
-//                }
-//            }
-//        }
-//    }
-//}
-
 @Composable
 fun CheckoutScreen(itemData: ItemData, navController: NavController) {
     val transfer = remember { mutableStateOf(false) }
