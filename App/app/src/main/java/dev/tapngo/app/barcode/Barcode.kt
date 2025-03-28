@@ -51,7 +51,7 @@ fun Barcode(
             Log.d("Barcode", "ScanCode hit")
             if (detectedBarcode != "null" &&
                 detectedBarcode.isNotBlank() &&
-                detectedBarcode.matches(Regex("^\\d+:\\d+$"))
+                detectedBarcode.matches(Regex("^\\d+$"))
             ) {
                 barcode = detectedBarcode
                 navController.navigate("barcode/${detectedBarcode}")
