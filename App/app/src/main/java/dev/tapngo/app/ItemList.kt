@@ -38,6 +38,7 @@ import dev.tapngo.app.utils.httputils.Cookie
 import dev.tapngo.app.utils.httputils.CookieType
 import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
+import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -174,6 +175,7 @@ fun ItemList(
                     itemListData = item,
                     onItemClick = {
                         try {
+                            updateItem(ItemData(item.id, null))
                             navController.navigate("checkout/${item.sku}")
                         } catch (e: Exception) {
                             Log.e("Navigation", "Failed to navigate: ${e.message}")

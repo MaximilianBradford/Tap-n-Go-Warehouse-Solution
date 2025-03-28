@@ -39,6 +39,10 @@ fun ItemPopup(
                     Text(text = "SKU: ${item.sku}")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Description: ${item.description}")
+                    if(item.selectedLocation != null){
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Location: ${item.selectedLocation!!.name}")
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     if (item.imageData != null) {
                         Image(

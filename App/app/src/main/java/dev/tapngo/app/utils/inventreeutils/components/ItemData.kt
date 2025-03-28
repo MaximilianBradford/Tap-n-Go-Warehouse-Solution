@@ -18,6 +18,8 @@ class ItemData(val id: Int, val loc: Int?) {
     var description: String? = null
     var imageUrl: String? = null
     var imageData: ByteArray? = null
+    var stockItemId: Int? = null
+    var quantity: Int? = null
     var locations: List<Location>? = null
     var selectedLocation: Location? = null
 
