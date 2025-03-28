@@ -25,7 +25,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import dev.tapngo.app.ui.ErrorScreen
 import dev.tapngo.app.utils.setBothThemeColor
+
 
 //Referenced from https://github.com/DUMA042/BarsandQ/tree/master
 @OptIn(ExperimentalPermissionsApi::class) // Opt-in to use experimental permissions API
@@ -48,9 +50,11 @@ fun Barcode(
         mutableStateOf(permissionState.status.shouldShowRationale)
     }
 
-    // Check if a barcode has been scanned
-    if (barcode != null) {
+    var barcodeCheck by remember { mutableStateOf(false) }
 
+    // Check if a barcode has been scanned
+    if (barcode != null || barcodeCheck) {
+    Log.d("Barcode", "$barcode")
         // Box to hold the UI elements and center them on the screen
         Box(
             modifier = Modifier
@@ -90,6 +94,8 @@ fun Barcode(
                     // permission is required
                     "Camera permission required for this feature to be available. " +
                             "Please grant the permission"
+                } else if (barcodeCheck) {
+                    "Invalid Barcode Scanned! Please try again."
                 } else {
                     // If permission is granted, show the scanned barcode or a default message
                     barcode ?: "No Scanned"
@@ -113,10 +119,21 @@ fun Barcode(
         }
     } else {
         // If no barcode has been scanned, show the QR/barcode scanner
-        Log.d("Barcode", "Data sent " + barcode)
+        Log.d("Barcode", "Data sent $barcode")
         ScanCode(onQrCodeDetected = { detectedBarcode ->
-            barcode = detectedBarcode
-            navController.navigate("barcode/${detectedBarcode}")
+            Log.d("Barcode", "ScanCode hit")
+            if (detectedBarcode!= "null" && detectedBarcode.isNotBlank() && detectedBarcode.matches(
+                    Regex("^\\d+:\\d+$")
+                )
+            ){
+                barcode = detectedBarcode
+                navController.navigate("barcode/${detectedBarcode}")
+            }
+            else {
+                barcode = null
+                barcodeCheck = true
+
+            }
         })
     }
 

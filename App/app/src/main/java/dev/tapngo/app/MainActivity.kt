@@ -337,15 +337,8 @@ fun AppNavHost(navController: NavHostController) {
                 val barcode_id = navBackStackEntry.arguments?.getString("barcode_id")
                 barcode_id?.let { barcode_id ->
                     try {
-                        item =
-                            if (barcode_id != null && barcode_id != "null" && barcode_id.isNotBlank() && barcode_id.matches(
-                                    Regex("\\d+")
-                                )
-                            ) {
-                                getItemData(barcode_id.toInt(), null)
-                            } else {
-                                null // or some default value
-                            }
+                        val split = barcode_id.split(":")
+                        item = getItemData(split[0].toInt(), split[1].toInt())
                     } catch (e: IOException) {
                         Log.e("Barcode", "Barcode scanner failed to retrieve item ${e.message}")
                     }
@@ -373,6 +366,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-const val server = "10.0.2.2:8000" // Localhost
-//const val server = "10.0.0.116:8080" // Desktop
+//const val server = "10.0.2.2:8000" // Localhost
+const val server = "10.0.0.116:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)
