@@ -47,7 +47,9 @@ class JobItem(models.Model):
     """Model representing an item moved from stock to a job."""
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='items', verbose_name=_('Job'))
     stock_item = models.ForeignKey('part.Part', on_delete=models.CASCADE, verbose_name=_('Stock Item'))
-    quantity = models.DecimalField(max_digits=15, decimal_places=5, verbose_name=_('Quantity'))
+    quantity = models.PositiveIntegerField(default=0, verbose_name=_('Quantity'))
+    def get_absolute_url(self):
+        return reverse('jobitem-detail', kwargs={'pk': self.pk})
 
     def __str__(self):
         return f"{self.quantity} of {self.stock_item} for {self.job}"

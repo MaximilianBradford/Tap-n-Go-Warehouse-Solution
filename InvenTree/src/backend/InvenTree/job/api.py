@@ -2,9 +2,12 @@ from django.urls import include, path, re_path
 from rest_framework import permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.decorators import action
 from .models import Job, JobItem, JobTech, Address
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from stock.models import StockItem
 from .serializers import JobSerializer, JobItemSerializer, JobItemListSerializer, JobTechSerializer, AddressSerializer
 
 class JobViewSet(ModelViewSet):
@@ -284,6 +287,51 @@ class JobTechForJobViewSet(ModelViewSet):
         serializer.save(job_id=job_id, technician=self.request.user)
 
 
+class PartJobTransfer(ViewSet):
+    """
+    API endpoint for transferring parts from a StockItem's location to a job.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = JobItem.objects.none()
+
+    def create(self, request, pk=None):
+        """
+        Transfer parts from a StockItem's location to a job.
+        """
+        # Extract data from the request
+        stock_item_id = request.data.get('stock_item')
+        job_id = request.data.get('job')
+        quantity = request.data.get('quantity')
+
+        # Validate the input data
+        if not all([stock_item_id, job_id, quantity]):
+            return Response({'error': 'All fields (stock_item, job, quantity) are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            stock_item = StockItem.objects.get(pk=stock_item_id)
+            job = Job.objects.get(pk=job_id)
+        except StockItem.DoesNotExist:
+            return Response({'error': 'StockItem not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Job.DoesNotExist:
+            return Response({'error': 'Job not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the StockItem has enough quantity
+        if stock_item.quantity < quantity:
+            return Response({'error': 'Not enough quantity in the StockItem.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Deduct the quantity from the StockItem
+        stock_item.quantity -= quantity
+        stock_item.save()
+
+        # Add the quantity to the job
+        job_item, created = JobItem.objects.get_or_create(job=job, stock_item=stock_item.part, defaults={'quantity': 0})
+        job_item.quantity += quantity
+        job_item.save()
+
+        return Response({'message': 'Part transferred successfully.'}, status=status.HTTP_200_OK)
+    
+
+
 # URL patterns for the job API
 job_api_urls = [
     path(
@@ -291,7 +339,12 @@ job_api_urls = [
         include([
             path('<int:pk>/', include([
                 path('', JobDetail.as_view(), name='api-job-detail'),
-                path('items/', JobItemsForJobViewSet.as_view({'get': 'list', 'put': 'update_items', 'delete': 'delete_items'}), name='api-job-items-for-job'),
+                path('items/', 
+                     include([
+                         path('', JobItemsForJobViewSet.as_view({'get': 'list', 'put': 'update_items', 'delete': 'delete_items'}), name='api-job-items-for-job'),
+                         path('transfer/', PartJobTransfer.as_view({'post': 'create'}), name='api-job-transfer'),
+                     ])),
+                
                 path('tech/', JobTechForJobViewSet.as_view({'get': 'list', 'post': 'create'}), name='api-job-tech-for-job'),
                 path('address/', JobAddressDetail.as_view(), name='api-job-address'),
             ])),
