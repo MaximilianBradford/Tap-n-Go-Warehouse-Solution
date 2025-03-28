@@ -1,6 +1,5 @@
 package dev.tapngo.app
 
-//import dev.tapngo.app.ui.theme.TapNGoTheme
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -21,8 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,66 +38,37 @@ import androidx.navigation.compose.rememberNavController
 import com.example.compose.TapNGoTheme
 import com.example.compose.surfaceDark
 import com.example.compose.surfaceLight
+import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.inventreeutils.components.Job
+import dev.tapngo.app.utils.inventreeutils.components.Location
 import dev.tapngo.app.utils.setBothThemeColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 // Checkout screen component
-//@Composable
-//fun CheckoutScreen(itemData: ItemData, navController: NavController) {
-//    val transfer = remember { mutableStateOf(false) }
-//    Log.d("Check-out", "${itemData.sku}")
-//    TapNGoTheme {
-//        // I don't even center this one
-//        Column(modifier = Modifier.padding(16.dp)) {
-//            Text(
-//                text = "Checkout",
-//                style = MaterialTheme.typography.titleLarge,
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            // It's safe to assume that the itemData is not null
-//            // Even if it is, theoretically the following values will just simply not appear.
-//            Text(text = "SKU: ${itemData.sku}", color = MaterialTheme.colorScheme.primary)
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text(
-//                text = "Description: ${itemData.description}",
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            if (itemData.imageData != null) {
-//                Image(
-//                    bitmap = BitmapFactory.decodeByteArray(
-//                        itemData.imageData,
-//                        0,
-//                        itemData.imageData!!.size
-//                    ).asImageBitmap(),
-//                    contentDescription = null,
-//                    modifier = Modifier.size(128.dp)
-//                )
-//            }
-//            Spacer(modifier = Modifier.height(16.dp))
-//            itemData.locations?.let { LocationTable(it) }
-//            Spacer(modifier = Modifier.height(16.dp))
-//            if (transfer.value) {
-//                if(itemData.selectedLocation != null) {
-//                    Text("Transfer directly from ${itemData.selectedLocation?.name}")
-//                } else {
-//                    TransferComponent(itemData, navController)
-//                }
-//            } else {
-//                Button(onClick = { transfer.value = true }) {
-//                    Text("Transfer")
-//                }
-//            }
-//        }
-//    }
-//}
-
 @Composable
 fun CheckoutScreen(itemData: ItemData, navController: NavController) {
     val transfer = remember { mutableStateOf(false) }
+    var jobs by remember { mutableStateOf<List<Job>>(emptyList()) }
     Log.d("Check-out", "${itemData.sku}")
+
+
+
+    suspend fun getJobs() {
+        jobs = withContext(Dispatchers.IO) {
+            InvenTreeUtils.getUserJobs()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        getJobs()
+        while (jobs.isEmpty()) {
+            Thread.sleep(100)
+        }
+        Log.d("Check-out", "Jobs: $jobs")
+    }
 
     TapNGoTheme {
         Column(
@@ -160,15 +133,7 @@ fun CheckoutScreen(itemData: ItemData, navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             if (transfer.value) {
-                if (itemData.selectedLocation != null) {
-                    Text(
-                        text = "Transferring from: ${itemData.selectedLocation?.name}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    TransferComponent(itemData, navController)
-                }
+                TransferComponent(itemData, jobs, navController)
             } else {
                 Button(
                     onClick = { transfer.value = true },

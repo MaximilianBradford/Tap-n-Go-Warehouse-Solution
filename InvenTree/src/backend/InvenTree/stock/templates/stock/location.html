@@ -392,7 +392,6 @@
     $('#show-qr-code').click(function() {
         showQRDialog(
             '{% trans "Stock Location QR Code" escape %}',
-            `{% clean_barcode location.barcode %}`
         );
     });
 

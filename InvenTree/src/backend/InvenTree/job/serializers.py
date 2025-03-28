@@ -12,18 +12,6 @@ class AddressSerializer(serializers.ModelSerializer):
         model = Address
         fields = '__all__'
 
-class JobSerializer(serializers.ModelSerializer):
-    address = AddressSerializer()
-
-    class Meta:
-        model = Job
-        fields = '__all__'
-
-    def create(self, validated_data):
-        address_data = validated_data.pop('address')
-        address = Address.objects.create(**address_data)
-        job = Job.objects.create(address=address, **validated_data)
-        return job
 
 class JobItemSerializer(serializers.ModelSerializer):
     """Serializer for JobItem model."""
@@ -33,6 +21,21 @@ class JobItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobItem
         fields = ['id', 'job', 'stock_item', 'quantity']
+
+
+class JobSerializer(serializers.ModelSerializer):
+    address = AddressSerializer()
+    items = JobItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Job
+        fields = ['job_id', 'name', 'address', 'status', 'description', 'items']
+
+    def create(self, validated_data):
+        address_data = validated_data.pop('address')
+        address = Address.objects.create(**address_data)
+        job = Job.objects.create(address=address, **validated_data)
+        return job
 
 class JobItemListSerializer(serializers.ListSerializer):
     """ListSerializer for updating multiple JobItems."""
