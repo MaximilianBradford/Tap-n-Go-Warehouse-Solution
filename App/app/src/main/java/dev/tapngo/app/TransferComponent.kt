@@ -39,39 +39,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun TransferComponent(itemData: ItemData, navController: NavController) {
-    var locations by remember { mutableStateOf<List<Location>>(emptyList()) }
-    var jobs by remember { mutableStateOf<List<Job>>(emptyList()) }
-    var selectedFromLocation by remember { mutableStateOf<Location?>(null) }
+fun TransferComponent(itemData: ItemData, jobs: List<Job>, navController: NavController) {
+    var selectedFromLocation by remember { mutableStateOf(itemData.selectedLocation) }
     var selectedToJob by remember { mutableStateOf<Job?>(null) }
     var expandedFrom by remember { mutableStateOf(false) }
     var expandedTo by remember { mutableStateOf(false) }
     var quantity by remember { mutableStateOf(TextFieldValue("")) }
     val coroutineScope = rememberCoroutineScope()
 
-    suspend fun getData() {
-        locations = withContext(Dispatchers.IO) {
-            InvenTreeUtils.getLocationList(null, null)
+    Log.d("TransferComponent", "Jobs: $jobs")
 
-        }
-    }
-
-    suspend fun getJobs() {
-        jobs = withContext(Dispatchers.IO) {
-            InvenTreeUtils.getUserJobs()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        getData()
-        getJobs()
-        Log.d("TransferComponent", "Jobs: $jobs")
-    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -79,7 +60,7 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if(itemData.selectedLocation == null) {
+            if (itemData.selectedLocation == null) {
                 Box(modifier = Modifier
                     .weight(1f)
                     .height(48.dp)) {
@@ -98,8 +79,6 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
                         }
                     }
                 }
-            } else {
-                Text(text = "Location: ${itemData.selectedLocation?.name}", color = MaterialTheme.colorScheme.primary)
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -167,18 +146,4 @@ fun TransferComponent(itemData: ItemData, navController: NavController) {
             Text("Confirm")
         }
     }
-}
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun TransferComponentPreview() {
-    val dummyItem = ItemData(id = 1, loc = null).apply {
-        sku = "12345XYZ"
-        description = "Sample Item for Checkout"
-    }
-
-    val mockNavController = rememberNavController() // Mock NavController for preview
-
-    TransferComponent(itemData = dummyItem, navController = mockNavController)
 }

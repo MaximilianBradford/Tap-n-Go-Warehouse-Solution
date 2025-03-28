@@ -39,6 +39,10 @@ fun ItemPopup(
                     Text(text = "SKU: ${item.sku}")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Description: ${item.description}")
+                    if(item.selectedLocation != null){
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Location: ${item.selectedLocation!!.name}")
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     if (item.imageData != null) {
                         Image(
@@ -59,6 +63,7 @@ fun ItemPopup(
             confirmButton = {
                 Button(onClick = {
                     onDismiss()
+                    updateItem(item)
                     // Funny thing about this is that the parameters aren't even used.
                     Log.d("nfc press", "${item.sku}")
                     navController.navigate("checkout/${item.sku}")

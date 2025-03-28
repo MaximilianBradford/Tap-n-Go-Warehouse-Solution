@@ -33,6 +33,10 @@ import dev.tapngo.app.ui.LoadingScreen
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getPartFromStockNo
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 
@@ -152,7 +156,12 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
         if (data.isDigitsOnly()) {
-            item = getPartFromStockNo(data.toInt())
+            CoroutineScope(Dispatchers.IO).launch {
+                item = getPartFromStockNo(data.toInt())
+            }
+            while (item == null) {
+                Thread.sleep(100)
+            }
             showDialog.value = true
         }
     }
@@ -340,34 +349,8 @@ fun AppNavHost(navController: NavHostController) {
                     navArgument("barcode_id") { type = NavType.StringType }
                 )
             ) { navBackStackEntry ->
-                val barcode_id = navBackStackEntry.arguments?.getString("barcode_id")
-                barcode_id?.let { barcode_id ->
-                    try {
-                        item =
-                            if (barcode_id != null && barcode_id != "null" && barcode_id.isNotBlank() && barcode_id.matches(
-                                    Regex("\\d+")
-                                )
-                            ) {
-                                getPartFromStockNo(barcode_id.toInt())
-                            } else {
-                                null // or some default value
-                            }
-                    } catch (e: IOException) {
-                        Log.e("Barcode", "Barcode scanner failed to retrieve item ${e.message}")
-                    }
-                    var showpop by remember { mutableStateOf(true) }
-                    if (item != null) {
-                        ItemPopup(
-                            showDialog = showpop,
-                            onDismiss = { showpop = false },
-                            item = item,
-                            navController = navController
-                        )
-                        //CheckoutScreen(itemData = item!!, navController = navController)
-                    } else {
-                        Text("Barcode Scan Failed, please try again")
-                    }
-                }
+                val barcodeId = navBackStackEntry.arguments?.getString("barcode_id") ?: return@composable
+                BarcodeScreen(barcodeId, navController)
             }
         }
     }
@@ -379,6 +362,6 @@ var authToken: String? = null
 
 
 // Constants for my testing servers ~ Dan
-const val server = "10.0.2.2:8000" // Localhost
-//const val server = "192.168.4.21:8080" // Desktop
+//const val server = "10.0.2.2:8000" // Localhost
+const val server = "192.168.4.21" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)
