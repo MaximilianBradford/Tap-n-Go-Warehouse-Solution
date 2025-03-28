@@ -241,14 +241,23 @@ fun AppNavHost(navController: NavHostController) {
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             IconButton(onClick = {
-                                mainScreenState =
-                                    MainScreenState.NFCScan; navController.popBackStack(
+                                mainScreenState = when (mainScreenState) {
+                                    is MainScreenState.NFCScan -> MainScreenState.Barcode
+                                    is MainScreenState.Barcode -> MainScreenState.NFCScan
+                                    else -> MainScreenState.NFCScan
+                                }; navController.popBackStack(
                                 route = "main",
                                 inclusive = false
                             )
-                                Log.d("NavBar", "NFC Called")
+                                Log.d("NavBar", "Scanning Called")
                             }) {
-                                Icon(Icons.Filled.Nfc, contentDescription = "NFC menu")
+                                Icon(
+                                    if (mainScreenState is MainScreenState.NFCScan)
+                                        Icons.Filled.Nfc
+                                    else
+                                        Icons.Filled.Camera,
+                                    contentDescription = "Switching Scanning Mode"
+                                )
                             }
                             IconButton(onClick = {
                                 mainScreenState =
@@ -263,19 +272,19 @@ fun AppNavHost(navController: NavHostController) {
                                     contentDescription = "Localized description",
                                 )
                             }
-                            IconButton(onClick = {
-                                mainScreenState =
-                                    MainScreenState.Barcode; navController.popBackStack(
-                                route = "main",
-                                inclusive = false
-                            )
-                                Log.d("NavBar", "Barcode Called")
-                            }) {
-                                Icon(
-                                    Icons.Filled.Camera,
-                                    contentDescription = "Barcode Reader",
-                                )
-                            }
+//                            IconButton(onClick = {
+//                                mainScreenState =
+//                                    MainScreenState.Barcode; navController.popBackStack(
+//                                route = "main",
+//                                inclusive = false
+//                            )
+//                                Log.d("NavBar", "Barcode Called")
+//                            }) {
+//                                Icon(
+//                                    Icons.Filled.Camera,
+//                                    contentDescription = "Barcode Reader",
+//                                )
+//                            }
                             IconButton(onClick = {
                                 mainScreenState =
                                     MainScreenState.Job; navController.popBackStack(
