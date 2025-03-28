@@ -63,7 +63,6 @@ fun ItemPopup(
             confirmButton = {
                 Button(onClick = {
                     onDismiss()
-                    updateItem(item)
                     // Funny thing about this is that the parameters aren't even used.
                     Log.d("nfc press", "${item.sku}")
                     navController.navigate("checkout/${item.sku}")
