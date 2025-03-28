@@ -1,20 +1,12 @@
 package dev.tapngo.app
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.util.Log
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -35,6 +27,8 @@ fun JobItem(job: Job) {
         3 -> Color.Green
         else -> Color.Gray
     }
+
+    var expanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -66,6 +60,24 @@ fun JobItem(job: Job) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "${job.address.zip}", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = { expanded = !expanded }) {
+                Text("Show Items")
+            }
+
+            if(job.items.isNotEmpty() && expanded) {
+                JobItemTable(job = job)
+            }
+        }
+    }
+}
+
+@Composable
+fun JobItemTable(job: Job) {
+    job.items.forEach { item ->
+        Row {
+            Text(text = item.part.description!!)
+            Text(text = item.quantity.toString())
         }
     }
 }

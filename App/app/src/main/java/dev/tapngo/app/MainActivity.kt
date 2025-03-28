@@ -31,6 +31,7 @@ import dev.tapngo.app.ui.ErrorScreen
 import dev.tapngo.app.ui.InventoryActivity
 import dev.tapngo.app.ui.LoadingScreen
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
+import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getPartFromStockNo
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import java.io.IOException
 
@@ -149,11 +150,9 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
      * I wish the NFCReader class could be self contained... It probably can, but I've got no time ~ Dan
      */
     override fun onNfcDataRead(data: String) {
-        val regex = Regex("^\\d+:\\d+$")
         Log.d("MainActivity", "NFC data reads: $data")
-        if (regex.matches(data)) {
-            val split = data.split(":")
-            item = getItemData(split[0].toInt(), split[1].toInt())
+        if (data.isDigitsOnly()) {
+            item = getPartFromStockNo(data.toInt())
             showDialog.value = true
         }
     }
@@ -342,7 +341,6 @@ fun AppNavHost(navController: NavHostController) {
                                     Regex("\\d+")
                                 )
                             ) {
-                                getItemData(barcode_id.toInt(), null)
                             } else {
                                 null // or some default value
                             }
@@ -374,5 +372,5 @@ var authToken: String? = null
 
 // Constants for my testing servers ~ Dan
 const val server = "10.0.2.2:8000" // Localhost
-//const val server = "10.0.0.116:8080" // Desktop
+//const val server = "192.168.4.21:8080" // Desktop
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)

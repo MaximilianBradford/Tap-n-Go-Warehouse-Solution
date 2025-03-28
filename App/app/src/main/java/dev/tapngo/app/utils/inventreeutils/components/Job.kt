@@ -5,5 +5,6 @@ class Job(
     val address: Address,
     val status: Int,
     val name: String,
-    val description: String
+    val description: String,
+    val items: List<JobItem>
 )
