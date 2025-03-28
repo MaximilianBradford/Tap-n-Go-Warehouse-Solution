@@ -253,14 +253,23 @@ fun AppNavHost(navController: NavHostController) {
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             IconButton(onClick = {
-                                mainScreenState =
-                                    MainScreenState.NFCScan; navController.popBackStack(
+                                mainScreenState = when (mainScreenState) {
+                                    is MainScreenState.NFCScan -> MainScreenState.Barcode
+                                    is MainScreenState.Barcode -> MainScreenState.NFCScan
+                                    else -> MainScreenState.NFCScan
+                                }; navController.popBackStack(
                                 route = "main",
                                 inclusive = false
                             )
-                                Log.d("NavBar", "NFC Called")
+                                Log.d("NavBar", "Scanning Called")
                             }) {
-                                Icon(Icons.Filled.Nfc, contentDescription = "NFC menu")
+                                Icon(
+                                    if (mainScreenState is MainScreenState.NFCScan)
+                                        Icons.Filled.Nfc
+                                    else
+                                        Icons.Filled.Camera,
+                                    contentDescription = "Switching Scanning Mode"
+                                )
                             }
                             IconButton(onClick = {
                                 mainScreenState =
@@ -275,19 +284,19 @@ fun AppNavHost(navController: NavHostController) {
                                     contentDescription = "Localized description",
                                 )
                             }
-                            IconButton(onClick = {
-                                mainScreenState =
-                                    MainScreenState.Barcode; navController.popBackStack(
-                                route = "main",
-                                inclusive = false
-                            )
-                                Log.d("NavBar", "Barcode Called")
-                            }) {
-                                Icon(
-                                    Icons.Filled.Camera,
-                                    contentDescription = "Barcode Reader",
-                                )
-                            }
+//                            IconButton(onClick = {
+//                                mainScreenState =
+//                                    MainScreenState.Barcode; navController.popBackStack(
+//                                route = "main",
+//                                inclusive = false
+//                            )
+//                                Log.d("NavBar", "Barcode Called")
+//                            }) {
+//                                Icon(
+//                                    Icons.Filled.Camera,
+//                                    contentDescription = "Barcode Reader",
+//                                )
+//                            }
                             IconButton(onClick = {
                                 mainScreenState =
                                     MainScreenState.Job; navController.popBackStack(
@@ -349,6 +358,7 @@ fun AppNavHost(navController: NavHostController) {
                     navArgument("barcode_id") { type = NavType.StringType }
                 )
             ) { navBackStackEntry ->
+
                 val barcodeId = navBackStackEntry.arguments?.getString("barcode_id") ?: return@composable
                 BarcodeScreen(barcodeId, navController)
             }
@@ -363,5 +373,6 @@ var authToken: String? = null
 
 // Constants for my testing servers ~ Dan
 //const val server = "10.0.2.2:8000" // Localhost
-const val server = "192.168.4.21" // Desktop
+const val server = "10.0.0.116:8080" // Desktop
+
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)

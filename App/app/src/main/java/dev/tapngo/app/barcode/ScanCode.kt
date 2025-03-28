@@ -117,10 +117,12 @@ fun ScanCode(
 
     // If a QR/barcode has been detected, trigger the callback
     if (qrCodeDetected) {
+
         LaunchedEffect(Unit) {
+            Log.d("Barcode", "LaunchedEffect entered")
             // Delay for a short duration to allow recomposition
             delay(100) // Adjust delay as needed
-
+            Log.d("BarcodeScanner", "Barcode state changed: $barcode")
             // Call the callback with the detected barcode value
             onQrCodeDetected(barcode ?: "")
         }

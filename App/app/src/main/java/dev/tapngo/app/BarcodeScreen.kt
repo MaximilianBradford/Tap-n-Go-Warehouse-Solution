@@ -20,8 +20,7 @@ fun BarcodeScreen(barcodeId: String, navController: NavController) {
         ErrorScreen(errorMessage = "Barcode Scan Failed, please try again")
         return
     }
-
-    var item: ItemData? by remember { mutableStateOf(null) }
+    
     var showpop by remember { mutableStateOf(true) }
 
     LaunchedEffect(barcodeId) {

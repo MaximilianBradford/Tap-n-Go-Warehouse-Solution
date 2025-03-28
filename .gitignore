@@ -1,1 +1,15 @@
 /App/.idea
+# IntelliJ IDEA files
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries
+.idea/shelf
+*.salive
+
+# Gradle and Android Studio files
+*.iml
+.gradle/
+build/
+captures/
+
