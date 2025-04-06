@@ -125,8 +125,12 @@ fun ItemList(
     ) {
         itemList.clear()
         isLoadingMore.value = true
-        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
-        itemList.addAll(items)
+        try {
+            val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
+            itemList.addAll(items)
+        } catch (e: Exception){
+            Log.d("Populate-List", "Populate List failed due to $e")
+        }
         isLoadingMore.value = false
     }
 
