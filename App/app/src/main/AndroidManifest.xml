@@ -32,9 +32,11 @@
         <!-- SplashActivity declaration with a launcher intent filter -->
         <activity
             android:name=".SplashActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Splash"
             android:noHistory="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="DiscouragedApi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,8 +45,10 @@
 
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true"
-            android:theme="@style/Theme.TapNGo" >
+            android:theme="@style/Theme.TapNGo"
+            tools:ignore="DiscouragedApi">
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
@@ -57,11 +61,14 @@
         <!-- InventoryActivity declaration -->
         <activity
             android:name="dev.tapngo.app.ui.InventoryActivity"
+            android:screenOrientation="portrait"
             android:label="Inventory Activity"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="DiscouragedApi">
         </activity>
 
-        <activity android:name=".ui.EditInventoryActivity" />
+        <activity android:name=".ui.EditInventoryActivity" android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi" />
     </application>
 
 </manifest>
