@@ -343,9 +343,7 @@ fun AppNavHost(navController: NavHostController) {
                 "checkout/{sku}",
                 arguments = listOf(
                     navArgument("sku") { type = NavType.StringType },
-
                     )
-
             ) {
                 Log.d("CheckoutDebug", "Before checkout: item = $item")
                 while (item == null) { // Hacky, but eh.. It works.
