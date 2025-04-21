@@ -38,6 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import dev.tapngo.app.utils.internetcheck.*
 
 
 /*
@@ -57,12 +58,15 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // controller
     private lateinit var navController: NavHostController
 
+    //Monitor for network connection
+    private lateinit var networkMonitor: NetworkMonitor
+
     // Entry point for the app.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        context = this
-        Log.d("MainActivity", "onCreate called")
 
+        Log.d("MainActivity", "onCreate called")
+        networkMonitor = NetworkMonitor(applicationContext)
         // Get the NFC service and cast it to NfcManager to get the default adapter
         // I feel like directly casting the service to NfcManager is a terrible idea ~ Dan
         nfcAdapter = (getSystemService(NFC_SERVICE) as NfcManager).defaultAdapter
@@ -101,6 +105,8 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 AppNavHost(navController)
             }
         }
+
+
     }
 
     // This is the method that will be called when the "Start" button is clicked
@@ -119,6 +125,21 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
      */
     override fun onResume() {
         super.onResume()
+        networkMonitor.connectionMonitor(
+
+            onConnectionChange = { isConnected ->
+                if (isConnected) {
+                    connectionStatus = true
+                    Toast.makeText(this, "WiFi connected", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    connectionStatus = false
+                    Toast.makeText(this, "WiFi disconnected", Toast.LENGTH_SHORT).show()
+                }
+            },
+            intervalMs = 3000
+
+        )
         Log.d("MainActivity", "onResume called")
         window.decorView.post { //Getting persistent errors with nfcreader enabling before the system is ready. Trying this fix.
             nfcReader?.enableNfcForegroundDispatch()
@@ -135,6 +156,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         super.onPause()
         Log.d("MainActivity", "onPause called")
         nfcReader?.disableNfcForegroundDispatch()
+        networkMonitor.stopMonitoring()
     }
 
     /*
@@ -146,6 +168,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         super.onNewIntent(intent)
         Log.d("MainActivity", "onNewIntent called with action: ${intent.action}")
         nfcReader?.handleNfcIntent(intent)
+        networkMonitor.stopMonitoring()
     }
 
     /*
@@ -165,7 +188,11 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
             showDialog.value = true
         }
     }
+
+
+
 }
+var connectionStatus: Boolean = false
 
 // Global variable to store the currently scanned item.
 var item: ItemData? = null
@@ -176,6 +203,7 @@ var nfcReader: NFCReader? = null
 fun updateItem(itemData: ItemData) {
     item = itemData
 }
+
 
 //var context: Context? = null
 
@@ -224,6 +252,7 @@ fun MainScreen(
             is MainScreenState.Job -> {
                 JobListScreen(navController = navController)
             }
+
         }
     }
 }
@@ -244,7 +273,7 @@ fun AppNavHost(navController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            if (!isLoginScreen) {
+            if (!isLoginScreen && connectionStatus) {
                 Log.d("App Bar", "Main App Bar Used")
                 BottomAppBar(
                     actions = {
@@ -360,6 +389,7 @@ fun AppNavHost(navController: NavHostController) {
                 val barcodeId = navBackStackEntry.arguments?.getString("barcode_id") ?: return@composable
                 BarcodeScreen(barcodeId, navController)
             }
+
         }
     }
 }
