@@ -165,28 +165,34 @@ class InvenTreeUtils {
             val jsonArray = response.getAsJson()!!.asJsonArray
 
             jsonArray.forEach { part ->
-                val obj = part.asJsonObject
-                val quan = obj.get("quantity").asInt
-                val pk = obj.get("pk").asInt
-                val location = obj.get("location_detail").asJsonObject
-                val id = location.get("pk").asInt
-                val name = location.get("name").asString
-                var description: String? = null
-                var pathstring: String = location.get("pathstring").asString
-                var items: Int? = null
-                var sublocations: Int? = null
-                if (location.has("description"))
-                    description = location.get("description").asString
-                if (location.has("items"))
-                    items = location.get("items").asInt
-                if (location.has("sublocations"))
-                    sublocations = location.get("sublocations").asInt
-                val loc = Location(id, name, description, pathstring, items, sublocations)
-                loc.setQuantity(quan)
-                loc.setPk(pk)
-                locations.add(loc)
+                try {
+                    val obj = part.asJsonObject
+                    val quan = obj.get("quantity").asInt
+                    val pk = obj.get("pk").asInt
+                    val locationcheck = obj.get("location_detail")
+                    if (locationcheck != null && !locationcheck.isJsonNull) {
+                        val location = obj.get("location_detail").asJsonObject
+                        val id = location.get("pk").asInt
+                        val name = location.get("name").asString
+                        var description: String? = null
+                        var pathstring: String = location.get("pathstring").asString
+                        var items: Int? = null
+                        var sublocations: Int? = null
+                        if (location.has("description"))
+                            description = location.get("description").asString
+                        if (location.has("items"))
+                            items = location.get("items").asInt
+                        if (location.has("sublocations"))
+                            sublocations = location.get("sublocations").asInt
+                        val loc = Location(id, name, description, pathstring, items, sublocations)
+                        loc.setQuantity(quan)
+                        loc.setPk(pk)
+                        locations.add(loc)
+                    }
+                } catch (e: Exception){
+                    Log.d("GetPartLocation", "Error thrown making json array: $e")
+                }
             }
-
             return locations
         }
 
