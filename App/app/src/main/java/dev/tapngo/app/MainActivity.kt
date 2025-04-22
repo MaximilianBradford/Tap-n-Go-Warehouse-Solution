@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import dev.tapngo.app.utils.internetcheck.*
+import kotlinx.coroutines.delay
 
 
 /*
@@ -373,11 +374,24 @@ fun AppNavHost(navController: NavHostController) {
                     )
             ) {
                 Log.d("CheckoutDebug", "Before checkout: item = ${getItem()}")
-                while (getItem().id == -1) { // Hacky, but eh.. It works.
-                    Thread.sleep(100)
-
+                var error by remember { mutableStateOf<String?>(null) }
+                var item by remember { mutableStateOf<ItemData?>(null) }
+                LaunchedEffect(Unit) {
+                    try {
+                        while (getItem().id == -1){
+                            delay(100)
+                        }
+                        item = getItem()
+                    } catch (e:Exception) {
+                        error = e.message ?: "Unknown Error"
+                    }
                 }
-                CheckoutScreen(itemData = getItem(), navController = navController)
+                when {
+                    error != null -> MainScreen(
+                        mainScreenState, navController,
+                    )
+                    item != null -> CheckoutScreen(itemData = item!!, navController = navController)
+                }
             }
             composable("barcode/{barcode_id}",
                 arguments = listOf(
@@ -392,6 +406,8 @@ fun AppNavHost(navController: NavHostController) {
         }
     }
 }
+
+
 
 
 // Cybersecurity is my passion! ~ Dan
