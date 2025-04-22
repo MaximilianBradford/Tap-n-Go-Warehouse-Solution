@@ -33,6 +33,7 @@ import dev.tapngo.app.ui.LoadingScreen
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getPartFromStockNo
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.itemUtils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -96,7 +97,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                         ItemPopup(
                             showDialog = showDialog.value,
                             onDismiss = { showDialog.value = false },
-                            item = item,
+                            item = getItem(),
                             navController = navController
                         )
                     }
@@ -179,10 +180,12 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
         if (data.isDigitsOnly()) {
+            var item: ItemData? = null
             CoroutineScope(Dispatchers.IO).launch {
                 item = getPartFromStockNo(data.toInt())
+                item?.let { updateItem(it) }
             }
-            while (item == null) {
+            while (getItem() == null) {
                 Thread.sleep(100)
             }
             showDialog.value = true
@@ -194,15 +197,10 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
 }
 var connectionStatus: Boolean = false
 
-// Global variable to store the currently scanned item.
-var item: ItemData? = null
 
 // reader
 var nfcReader: NFCReader? = null
 
-fun updateItem(itemData: ItemData) {
-    item = itemData
-}
 
 
 //var context: Context? = null
@@ -374,11 +372,12 @@ fun AppNavHost(navController: NavHostController) {
                     navArgument("sku") { type = NavType.StringType },
                     )
             ) {
-                Log.d("CheckoutDebug", "Before checkout: item = $item")
-                while (item == null) { // Hacky, but eh.. It works.
+                Log.d("CheckoutDebug", "Before checkout: item = ${getItem()}")
+                while (getItem().id == -1) { // Hacky, but eh.. It works.
                     Thread.sleep(100)
+
                 }
-                CheckoutScreen(itemData = item!!, navController = navController)
+                CheckoutScreen(itemData = getItem(), navController = navController)
             }
             composable("barcode/{barcode_id}",
                 arguments = listOf(

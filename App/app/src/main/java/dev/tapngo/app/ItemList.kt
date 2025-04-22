@@ -40,6 +40,7 @@ import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
+import dev.tapngo.app.utils.itemUtils.updateItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
