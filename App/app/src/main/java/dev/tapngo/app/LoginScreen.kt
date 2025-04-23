@@ -111,14 +111,21 @@ fun LoginScreen(navController: NavHostController) {
                 if (username.isNotEmpty() && password.isNotEmpty()) {
                     Log.d(
                         "LoginScreen",
-                        "Sending login request - Username: $username, Password: $password"
+                        "Sending login request"
                     )
-                    InvenTreeUtils.sendLoginRequest(email, username, password) { key ->
+                    InvenTreeUtils.sendLoginRequest(email, username, password) { key, int ->
                         if (key != null) {
                             authToken = key
                             navController.navigate("main")
                         } else {
-                            errorMessage = "Login failed. Please check your credentials."
+                            errorMessage = when (int) {
+                                -1 -> "Network error. Please check your connection."
+                                400 -> "Invalid login information. Please check your credentials."
+                                401, 403 -> "Authentication failed. Please check your credentials."
+                                500 -> "Server error. Please try again later."
+                                502, 503, 504 -> "Server unavailable. Please try again later."
+                                else -> "Login failed with code $int. Please try again."
+                            }
                         }
                     }
                 } else {

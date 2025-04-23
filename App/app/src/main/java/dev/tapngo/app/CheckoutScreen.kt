@@ -45,6 +45,8 @@ import dev.tapngo.app.utils.inventreeutils.components.Location
 import dev.tapngo.app.utils.setBothThemeColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 
 // Checkout screen component
@@ -57,16 +59,20 @@ fun CheckoutScreen(itemData: ItemData, navController: NavController) {
 
 
     suspend fun getJobs() {
-        jobs = withContext(Dispatchers.IO) {
-            InvenTreeUtils.getUserJobs()
+        try {
+            val result = withTimeoutOrNull(5000L) {
+                jobs = withContext(Dispatchers.IO) {
+                    InvenTreeUtils.getUserJobs()
+                }
+            }
+        } catch (e: Exception) {
+            Log.d("Check-out", "Error with get jobs: $e")
         }
     }
 
+
     LaunchedEffect(Unit) {
         getJobs()
-        while (jobs.isEmpty()) {
-            Thread.sleep(100)
-        }
         Log.d("Check-out", "Jobs: $jobs")
     }
 

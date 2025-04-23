@@ -40,6 +40,7 @@ import dev.tapngo.app.utils.httputils.HttpRequest
 import dev.tapngo.app.utils.httputils.RequestMethod
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
 import dev.tapngo.app.utils.inventreeutils.components.ItemListData
+import dev.tapngo.app.utils.itemUtils.updateItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -126,8 +127,12 @@ fun ItemList(
     ) {
         itemList.clear()
         isLoadingMore.value = true
-        val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
-        itemList.addAll(items)
+        try {
+            val items = withContext(Dispatchers.IO) { getItemList(offNum, searchfunc) }
+            itemList.addAll(items)
+        } catch (e: IllegalStateException) {
+            Log.d("populateList", "error encountered $e" )
+        }
         isLoadingMore.value = false
     }
 
@@ -167,32 +172,37 @@ fun ItemList(
     Column(
         Modifier.fillMaxWidth()
     ) {
-        EndlessLazyColumn(
-            items = itemList,
-            itemKey = { item: ItemListData -> item.id },
-            itemContent = { item: ItemListData ->
-                ListItem(
-                    itemListData = item,
-                    onItemClick = {
-                        try {
-                            updateItem(ItemData(item.id, null))
-                            navController.navigate("checkout/${item.sku}")
-                        } catch (e: Exception) {
-                            Log.e("Navigation", "Failed to navigate: ${e.message}")
+        if (itemList.size == 0){
+            Text("No items found!")
+        } else {
+            EndlessLazyColumn(
+                items = itemList,
+                itemKey = { item: ItemListData -> item.id },
+                itemContent = { item: ItemListData ->
+                    ListItem(
+                        itemListData = item,
+                        onItemClick = {
+                            try {
+                                updateItem(ItemData(item.id, null))
+                                navController.navigate("checkout/${item.sku}")
+                            } catch (e: Exception) {
+                                Log.e("Navigation", "Failed to navigate: ${e.message}")
+                            }
                         }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                },
+                loadingItem = { LoadingItem() },
+                loadMore = {
+                    offNum.value += 50
+                    coroutineScope.launch {
+                        extendList(offNum.value, searchQuery.value)
                     }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            },
-            loadingItem = { LoadingItem() },
-            loadMore = {
-                offNum.value += 50
-                coroutineScope.launch {
-                    extendList(offNum.value, searchQuery.value)
-                }
-            },
-            isLoadingMore = isLoadingMore
-        )
+                },
+                isLoadingMore = isLoadingMore
+            )
+        }
+
 
     }
 //    Column(

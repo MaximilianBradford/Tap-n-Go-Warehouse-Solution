@@ -62,8 +62,10 @@ class HttpRequest<T>(
             }
             response = Response(responseCode, responseBody)
             if (responseType == String::class.java) {
+                Log.d("HttpRequest", "Thread State: ${Thread.currentThread().state}")
                 Log.d("HttpRequest", "Response: ${response.getAsJson().toString()}")
             } else {
+                Log.d("HttpRequest", "Thread State: ${Thread.currentThread().state}")
                 Log.d("HttpRequest", "Response is not a string")
             }
         } catch (e: Exception) {

@@ -11,6 +11,8 @@ import androidx.navigation.NavController
 import dev.tapngo.app.ui.ErrorScreen
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getPartFromStockNo
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.itemUtils.getItem
+import dev.tapngo.app.utils.itemUtils.updateItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -22,18 +24,19 @@ fun BarcodeScreen(barcodeId: String, navController: NavController) {
     }
     
     var showpop by remember { mutableStateOf(true) }
-
+    var founditem: ItemData?
     LaunchedEffect(barcodeId) {
-        item = withContext(Dispatchers.IO) {
+        founditem = withContext(Dispatchers.IO) {
             getPartFromStockNo(barcodeId.toInt())
         }
+        founditem?.let { updateItem(it) }
     }
 
-    if (item != null) {
+    if (getItem().id == -1) {
         ItemPopup(
             showDialog = showpop,
             onDismiss = { showpop = false },
-            item = item,
+            item = getItem(),
             navController = navController
         )
     } else {

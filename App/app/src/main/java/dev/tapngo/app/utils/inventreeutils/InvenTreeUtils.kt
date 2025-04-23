@@ -47,7 +47,7 @@ class InvenTreeUtils {
             email: String,
             username: String,
             password: String,
-            callback: (String?) -> Unit
+            callback: (String?, Int?) -> Unit
         ) {
             Log.d("LoginScreen", "Sending login request")
             thread {
@@ -56,8 +56,8 @@ class InvenTreeUtils {
                 cookies.add(Cookie(CookieType.CONTENT_TYPE, "application/json; utf-8"))
 
                 val body = JsonObject()
-                body.addProperty("email", email)
                 body.addProperty("username", username)
+                body.addProperty("email", email)
                 body.addProperty("password", password)
 
                 try {
@@ -69,6 +69,7 @@ class InvenTreeUtils {
                         String::class.java
                     )
 
+
                     val response = request.getResponse()
                     Log.d("LoginScreen", "Response Code: ${response.code}")
 
@@ -76,12 +77,12 @@ class InvenTreeUtils {
                         val jsonObject = response.getAsJson()!!.asJsonObject
                         val key = jsonObject!!.get("key").asString
                         Handler(Looper.getMainLooper()).post {
-                            callback(key)
+                            callback(key, response.code)
                         }
                     } else {
                         Log.e("LoginScreen", "Login failed with response code ${response.code}")
                         Handler(Looper.getMainLooper()).post {
-                            callback(null)
+                            callback(null, response.code)
                         }
                     }
 
@@ -89,13 +90,13 @@ class InvenTreeUtils {
                     e.printStackTrace()
                     Log.e("LoginScreen", "Error sending login request", e)
                     Handler(Looper.getMainLooper()).post {
-                        callback(null)
+                        callback(null, null)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Log.e("LoginScreen", "Unexpected error", e)
                     Handler(Looper.getMainLooper()).post {
-                        callback(null)
+                        callback(null, null)
                     }
                 }
             }

@@ -33,11 +33,13 @@ import dev.tapngo.app.ui.LoadingScreen
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getItemData
 import dev.tapngo.app.utils.inventreeutils.InvenTreeUtils.Companion.getPartFromStockNo
 import dev.tapngo.app.utils.inventreeutils.components.ItemData
+import dev.tapngo.app.utils.itemUtils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import dev.tapngo.app.utils.internetcheck.*
 
 
 /*
@@ -57,12 +59,15 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     // controller
     private lateinit var navController: NavHostController
 
+    //Monitor for network connection
+    private lateinit var networkMonitor: NetworkMonitor
+
     // Entry point for the app.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        context = this
-        Log.d("MainActivity", "onCreate called")
 
+        Log.d("MainActivity", "onCreate called")
+        networkMonitor = NetworkMonitor(applicationContext)
         // Get the NFC service and cast it to NfcManager to get the default adapter
         // I feel like directly casting the service to NfcManager is a terrible idea ~ Dan
         nfcAdapter = (getSystemService(NFC_SERVICE) as NfcManager).defaultAdapter
@@ -92,7 +97,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                         ItemPopup(
                             showDialog = showDialog.value,
                             onDismiss = { showDialog.value = false },
-                            item = item,
+                            item = getItem(),
                             navController = navController
                         )
                     }
@@ -101,6 +106,8 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 AppNavHost(navController)
             }
         }
+
+
     }
 
     // This is the method that will be called when the "Start" button is clicked
@@ -119,6 +126,21 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
      */
     override fun onResume() {
         super.onResume()
+        networkMonitor.connectionMonitor(
+
+            onConnectionChange = { isConnected ->
+                if (isConnected) {
+                    connectionStatus = true
+                    Toast.makeText(this, "WiFi connected", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    connectionStatus = false
+                    Toast.makeText(this, "WiFi disconnected", Toast.LENGTH_SHORT).show()
+                }
+            },
+            intervalMs = 3000
+
+        )
         Log.d("MainActivity", "onResume called")
         window.decorView.post { //Getting persistent errors with nfcreader enabling before the system is ready. Trying this fix.
             nfcReader?.enableNfcForegroundDispatch()
@@ -135,6 +157,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         super.onPause()
         Log.d("MainActivity", "onPause called")
         nfcReader?.disableNfcForegroundDispatch()
+        networkMonitor.stopMonitoring()
     }
 
     /*
@@ -146,6 +169,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
         super.onNewIntent(intent)
         Log.d("MainActivity", "onNewIntent called with action: ${intent.action}")
         nfcReader?.handleNfcIntent(intent)
+        networkMonitor.stopMonitoring()
     }
 
     /*
@@ -156,26 +180,28 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
     override fun onNfcDataRead(data: String) {
         Log.d("MainActivity", "NFC data reads: $data")
         if (data.isDigitsOnly()) {
+            var item: ItemData? = null
             CoroutineScope(Dispatchers.IO).launch {
                 item = getPartFromStockNo(data.toInt())
+                item?.let { updateItem(it) }
             }
-            while (item == null) {
+            while (getItem() == null) {
                 Thread.sleep(100)
             }
             showDialog.value = true
         }
     }
-}
 
-// Global variable to store the currently scanned item.
-var item: ItemData? = null
+
+
+}
+var connectionStatus: Boolean = false
+
 
 // reader
 var nfcReader: NFCReader? = null
 
-fun updateItem(itemData: ItemData) {
-    item = itemData
-}
+
 
 //var context: Context? = null
 
@@ -224,6 +250,7 @@ fun MainScreen(
             is MainScreenState.Job -> {
                 JobListScreen(navController = navController)
             }
+
         }
     }
 }
@@ -244,7 +271,7 @@ fun AppNavHost(navController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            if (!isLoginScreen) {
+            if (!isLoginScreen && connectionStatus) {
                 Log.d("App Bar", "Main App Bar Used")
                 BottomAppBar(
                     actions = {
@@ -343,15 +370,14 @@ fun AppNavHost(navController: NavHostController) {
                 "checkout/{sku}",
                 arguments = listOf(
                     navArgument("sku") { type = NavType.StringType },
-
                     )
-
             ) {
-                Log.d("CheckoutDebug", "Before checkout: item = $item")
-                while (item == null) { // Hacky, but eh.. It works.
+                Log.d("CheckoutDebug", "Before checkout: item = ${getItem()}")
+                while (getItem().id == -1) { // Hacky, but eh.. It works.
                     Thread.sleep(100)
+
                 }
-                CheckoutScreen(itemData = item!!, navController = navController)
+                CheckoutScreen(itemData = getItem(), navController = navController)
             }
             composable("barcode/{barcode_id}",
                 arguments = listOf(
@@ -362,6 +388,7 @@ fun AppNavHost(navController: NavHostController) {
                 val barcodeId = navBackStackEntry.arguments?.getString("barcode_id") ?: return@composable
                 BarcodeScreen(barcodeId, navController)
             }
+
         }
     }
 }
@@ -373,6 +400,6 @@ var authToken: String? = null
 
 // Constants for my testing servers ~ Dan
 //const val server = "10.0.2.2:8000" // Localhost
-const val server = "10.0.0.116:8080" // Desktop
+const val server = "10.0.0.116" // Desktop
 
 //const val server = "###.###.###.###:8080" // Garage servers. (not posting the IP here)
