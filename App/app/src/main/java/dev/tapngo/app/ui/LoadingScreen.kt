@@ -23,43 +23,39 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun LoadingScreen(loadingMessage: String, navController: NavController, NFCload: Boolean) {
-    val NFCloaded = false
-    if (!NFCloaded) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Top
+fun LoadingScreen(loadingMessage: String, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        SmallFloatingActionButton(
+            onClick = { navController.navigate("barcode") }
         ) {
-            SmallFloatingActionButton(
-                onClick = { navController.navigate("barcode") }
-            ) {
-                Icon(
-                    Icons.Filled.Camera,
-                    contentDescription = "Switching Scanning Mode"
-                )
-            }
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                color = MaterialTheme.colorScheme.primary // Primary color for loading
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = loadingMessage,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center
+            Icon(
+                Icons.Filled.Camera,
+                contentDescription = "Switching Scanning Mode"
             )
         }
     }
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            color = MaterialTheme.colorScheme.primary // Primary color for loading
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = loadingMessage,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+    }
 }

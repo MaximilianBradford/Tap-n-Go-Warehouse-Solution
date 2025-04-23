@@ -23,7 +23,6 @@ class NFCReader(
     // Store PendingIntent as a class property to avoid recreating it
     private var pendingIntent: PendingIntent? = null
     var isScanning = false
-
     init {
         Log.d("NFCReader", "NFCReader initialized")
         if (nfcAdapter == null) {

@@ -186,7 +186,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 item = getPartFromStockNo(data.toInt())
                 item?.let { updateItem(it) }
             }
-            while (getItem() == null) {
+            while (getItem().id == -1) {
                 Thread.sleep(100)
             }
             showDialog.value = true
@@ -231,7 +231,9 @@ fun MainScreen(
         when (currentScreen) {
             is MainScreenState.NFCScan -> {
                 if (nfcReader != null && nfcReader!!.isScanning) {
-                    LoadingScreen(loadingMessage = "Waiting for NFC Tag...", navController, false)
+                    LoadingScreen(
+                        loadingMessage = "Waiting for NFC Tag...", navController
+                    )
                 }
                 else {
                     ErrorScreen(errorMessage = "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!")
@@ -385,7 +387,7 @@ fun AppNavHost(navController: NavHostController) {
             composable("nfc")
             {
                 if (nfcReader != null && nfcReader!!.isScanning) {
-                    LoadingScreen(loadingMessage = "Waiting for NFC Tag...", navController, false)
+                    LoadingScreen(loadingMessage = "Waiting for NFC Tag...", navController)
                 } else {
                     ErrorScreen(errorMessage = "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!")
                 }
