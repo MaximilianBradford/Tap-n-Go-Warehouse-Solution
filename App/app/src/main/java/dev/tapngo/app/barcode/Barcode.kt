@@ -5,6 +5,8 @@ import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.ImageSearch
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,6 +64,21 @@ fun Barcode(
         })
     } else {
         // Fallback screen with error or permission handling
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Top
+        ) {
+            SmallFloatingActionButton(
+                onClick = { navController.navigate("nfc") }
+            ) {
+                Icon(
+                    Icons.Filled.Nfc,
+                    contentDescription = "Switching Scanning Mode"
+                )
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
