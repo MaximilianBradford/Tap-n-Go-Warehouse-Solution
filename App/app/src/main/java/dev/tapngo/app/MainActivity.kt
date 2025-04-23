@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import dev.tapngo.app.utils.internetcheck.*
+import kotlinx.coroutines.delay
 
 
 /*
@@ -185,7 +186,7 @@ class MainActivity : ComponentActivity(), NFCReader.NFCReaderCallback {
                 item = getPartFromStockNo(data.toInt())
                 item?.let { updateItem(it) }
             }
-            while (getItem() == null) {
+            while (getItem().id == -1) {
                 Thread.sleep(100)
             }
             showDialog.value = true
@@ -230,8 +231,11 @@ fun MainScreen(
         when (currentScreen) {
             is MainScreenState.NFCScan -> {
                 if (nfcReader != null && nfcReader!!.isScanning) {
-                    LoadingScreen(loadingMessage = "Waiting for NFC Tag...")
-                } else {
+                    LoadingScreen(
+                        loadingMessage = "Waiting for NFC Tag...", navController
+                    )
+                }
+                else {
                     ErrorScreen(errorMessage = "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!")
                 }
             }
@@ -242,7 +246,6 @@ fun MainScreen(
                 )
 
             }
-
             is MainScreenState.Barcode -> {
                 Barcode(navController = navController)
             }
@@ -280,22 +283,15 @@ fun AppNavHost(navController: NavHostController) {
                             horizontalArrangement = Arrangement.Center,
                         ) {
                             IconButton(onClick = {
-                                mainScreenState = when (mainScreenState) {
-                                    is MainScreenState.NFCScan -> MainScreenState.Barcode
-                                    is MainScreenState.Barcode -> MainScreenState.NFCScan
-                                    else -> MainScreenState.NFCScan
-                                }; navController.popBackStack(
+                                mainScreenState = MainScreenState.NFCScan; navController.popBackStack(
                                 route = "main",
                                 inclusive = false
                             )
                                 Log.d("NavBar", "Scanning Called")
                             }) {
                                 Icon(
-                                    if (mainScreenState is MainScreenState.NFCScan)
-                                        Icons.Filled.Nfc
-                                    else
-                                        Icons.Filled.Camera,
-                                    contentDescription = "Switching Scanning Mode"
+                                    Icons.Filled.ImageSearch,
+                                    contentDescription = "Scanning Mode"
                                 )
                             }
                             IconButton(onClick = {
@@ -304,26 +300,13 @@ fun AppNavHost(navController: NavHostController) {
                                 route = "main",
                                 inclusive = false
                             )
-                                Log.d("NavBar", "ItemList Called")
+                                //Log.d("NavBar", "ItemList Called")
                             }) {
                                 Icon(
                                     Icons.Filled.Notes,
                                     contentDescription = "Localized description",
                                 )
                             }
-//                            IconButton(onClick = {
-//                                mainScreenState =
-//                                    MainScreenState.Barcode; navController.popBackStack(
-//                                route = "main",
-//                                inclusive = false
-//                            )
-//                                Log.d("NavBar", "Barcode Called")
-//                            }) {
-//                                Icon(
-//                                    Icons.Filled.Camera,
-//                                    contentDescription = "Barcode Reader",
-//                                )
-//                            }
                             IconButton(onClick = {
                                 mainScreenState =
                                     MainScreenState.Job; navController.popBackStack(
@@ -373,11 +356,24 @@ fun AppNavHost(navController: NavHostController) {
                     )
             ) {
                 Log.d("CheckoutDebug", "Before checkout: item = ${getItem()}")
-                while (getItem().id == -1) { // Hacky, but eh.. It works.
-                    Thread.sleep(100)
-
+                var error by remember { mutableStateOf<String?>(null) }
+                var item by remember { mutableStateOf<ItemData?>(null) }
+                LaunchedEffect(Unit) {
+                    try {
+                        while (getItem().id == -1){
+                            delay(100)
+                        }
+                        item = getItem()
+                    } catch (e:Exception) {
+                        error = e.message ?: "Unknown Error"
+                    }
                 }
-                CheckoutScreen(itemData = getItem(), navController = navController)
+                when {
+                    error != null -> MainScreen(
+                        mainScreenState, navController,
+                    )
+                    item != null -> CheckoutScreen(itemData = item!!, navController = navController)
+                }
             }
             composable("barcode/{barcode_id}",
                 arguments = listOf(
@@ -388,10 +384,24 @@ fun AppNavHost(navController: NavHostController) {
                 val barcodeId = navBackStackEntry.arguments?.getString("barcode_id") ?: return@composable
                 BarcodeScreen(barcodeId, navController)
             }
+            composable("nfc")
+            {
+                if (nfcReader != null && nfcReader!!.isScanning) {
+                    LoadingScreen(loadingMessage = "Waiting for NFC Tag...", navController)
+                } else {
+                    ErrorScreen(errorMessage = "Whoops, something is wrong with the NFC scanner. Please exit the app and try again with the scanner!")
+                }
+            }
+            composable("barcode")
+            {
+                Barcode(navController)
+            }
 
         }
     }
 }
+
+
 
 
 // Cybersecurity is my passion! ~ Dan

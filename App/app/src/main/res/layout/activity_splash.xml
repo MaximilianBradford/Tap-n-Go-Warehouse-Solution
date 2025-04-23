@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:background="@color/on_surface"
     android:gravity="center"
-    android:background="@drawable/ic_splash_background">
+    android:orientation="vertical">
 
     <!-- Splash Logo -->
     <ImageView
         android:id="@+id/splashLogo"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:visibility="gone"
-        android:src="@drawable/ic_splash_logo" />
+        android:background="#050505"
+        android:src="@drawable/ic_splash_logo"
+        android:visibility="gone" />
 
     <!-- ProgressBar -->
     <ProgressBar
         android:id="@+id/splashProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:indeterminate="true" />
+        android:indeterminate="true"
+        android:visibility="gone" />
 
     <!-- App Logo -->
     <ImageView
         android:id="@+id/appLogo"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:src="@mipmap/ic_launcher_round"
-        android:contentDescription="App Logo" />
+        android:contentDescription="App Logo"
+        android:src="@mipmap/ic_launcher_round" />
 
     <!-- App Name -->
     <TextView
         android:id="@+id/appName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="@string/app_name"
+        android:textColor="@color/on_primary"
         android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginTop="10dp" />
+        android:textStyle="bold" />
 
     <!-- Lottie Animation -->
     <com.airbnb.lottie.LottieAnimationView
@@ -48,8 +49,8 @@
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_marginTop="20dp"
-        app:lottie_rawRes="@raw/splash_animation"
         app:lottie_autoPlay="true"
-        app:lottie_loop="true" />
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/splash_animation" />
 
 </LinearLayout>

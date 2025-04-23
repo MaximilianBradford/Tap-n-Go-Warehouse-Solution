@@ -68,7 +68,7 @@ class NetworkMonitor(context: Context) {
                         onConnectionChange(currentState)
                     }
                 }
-                Log.d("Connection", "Checking connection $currentState")
+                //Log.d("Connection", "Checking connection $currentState")
             }
 
         }
